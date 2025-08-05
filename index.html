@@ -1,29 +1,219 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-body {
-  margin-left: 200px;
-  background: #5d9ab2 url("img_tree.png") no-repeat top left;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Apply custom fonts */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
 
-.center_div {
-  border: 1px solid gray;
-  margin-left: auto;
-  margin-right: auto;
-  width: 90%;
-  background-color: #d0f0f6;
-  text-align: left;
-  padding: 8px;
-}
-</style>
+        /* Canvas for background animation */
+        #hearts-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+        }
+
+        /* Animation for the reason text */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out forwards;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gradient-to-br from-pink-200 via-rose-200 to-indigo-200 text-gray-800">
 
-<div class="center_div">
-  <h1>Hello World!</h1>
-  <p>This example contains some advanced CSS methods you may not have learned yet. But, we will explain these methods in a later chapter in the tutorial.</p>
-</div>
+    <!-- Canvas for the floating hearts animation -->
+    <canvas id="hearts-canvas"></canvas>
+
+    <div class="container mx-auto px-4 py-8 sm:py-16 text-center relative z-10">
+
+        <!-- Main Title -->
+        <header class="mb-12">
+            <h1 class="font-cursive text-5xl sm:text-7xl text-rose-600 drop-shadow-lg">To the Love of My Life</h1>
+            <!-- TODO: Replace 'Your Girlfriend's Name' with her actual name -->
+            <p class="text-2xl mt-2 text-gray-700">A little something for my favorite person, [Your Girlfriend's Name]</p>
+        </header>
+
+        <!-- A Personal Message -->
+        <section class="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl mb-12">
+            <h2 class="text-2xl font-semibold text-rose-500 mb-4">My Dearest,</h2>
+            <!-- TODO: Write your own personal message here -->
+            <p class="text-lg leading-relaxed">
+                Ever since you came into my life, every day has felt like a beautiful dream. This is just a small way to show you a fraction of how much you mean to me. You are my sunshine, my best friend, and my everything.
+            </p>
+        </section>
+
+        <!-- Interactive "Reasons I Love You" Section -->
+        <section class="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl mb-12">
+            <h2 class="text-2xl font-semibold text-rose-500 mb-4">A Few Reasons Why I Love You...</h2>
+            <p class="mb-6">There are a million reasons, but here are a few to start. Click the button!</p>
+            
+            <button id="reason-button" class="bg-rose-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-rose-600 transform hover:scale-105 transition-all duration-300 ease-in-out">
+                Tell Me Why!
+            </button>
+
+            <div id="reason-display" class="mt-6 min-h-[6rem] flex items-center justify-center p-4 bg-rose-100 rounded-lg">
+                <p class="text-xl text-rose-700 font-semibold">Your reason will appear here...</p>
+            </div>
+        </section>
+
+        <!-- Photo Gallery -->
+        <section class="max-w-4xl mx-auto">
+            <h2 class="font-cursive text-4xl sm:text-5xl text-rose-600 mb-8">Our Beautiful Moments</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- TODO: Replace these placeholder images with your own photos -->
+                <!-- For each image, change the src="..." to the path of your photo -->
+                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img src="https://placehold.co/600x600/fecdd3/be123c?text=Our+First+Date" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/fecdd3/be123c?text=Replace+Me';">
+                </div>
+                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 sm:mt-8">
+                    <img src="https://placehold.co/600x600/fbcfe8/86198f?text=That+Funny+Moment" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/fbcfe8/86198f?text=Replace+Me';">
+                </div>
+                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img src="https://placehold.co/600x600/f5d0fe/701a75?text=My+Favorite+Smile" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/f5d0fe/701a75?text=Replace+Me';">
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Message -->
+        <footer class="mt-16">
+            <p class="text-xl font-semibold text-gray-700">With all my love, forever and always,</p>
+            <!-- TODO: Replace with your name -->
+            <p class="font-cursive text-4xl text-rose-600 mt-2">[Your Name]</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Interactive Reasons Logic ---
+            const reasonButton = document.getElementById('reason-button');
+            const reasonDisplay = document.getElementById('reason-display');
+            
+            // TODO: Add your own reasons to this list!
+            const reasons = [
+                "Because you have the most beautiful smile.",
+                "For the way you laugh at my silly jokes.",
+                "Because you make me feel like I'm home.",
+                "For your kindness and compassionate heart.",
+                "Because you inspire me to be a better person.",
+                "For all the adventures we've had and all those to come.",
+                "Because you understand me like no one else.",
+                "For your incredible strength and resilience.",
+                "Because every moment with you is a treasure.",
+                "For the way your eyes light up when you're happy."
+            ];
+
+            let lastReasonIndex = -1;
+
+            reasonButton.addEventListener('click', () => {
+                let randomIndex;
+                // Simple logic to avoid showing the same reason twice in a row
+                do {
+                    randomIndex = Math.floor(Math.random() * reasons.length);
+                } while (randomIndex === lastReasonIndex);
+                
+                lastReasonIndex = randomIndex;
+                const reason = reasons[randomIndex];
+                
+                // Add a fade-in animation by reapplying a class
+                reasonDisplay.innerHTML = `<p class="text-xl text-rose-700 font-semibold">${reason}</p>`;
+                reasonDisplay.firstChild.classList.remove('fade-in');
+                // This little trick forces a reflow, allowing the animation to restart
+                void reasonDisplay.firstChild.offsetWidth; 
+                reasonDisplay.firstChild.classList.add('fade-in');
+            });
+
+            // --- Floating Hearts Animation ---
+            const canvas = document.getElementById('hearts-canvas');
+            const ctx = canvas.getContext('2d');
+            let hearts = [];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Heart object
+            function Heart() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100; // Start below the screen
+                this.size = Math.random() * 20 + 10; // Size between 10 and 30
+                this.speed = Math.random() * 2 + 1; // Speed between 1 and 3
+                this.opacity = Math.random() * 0.5 + 0.3; // Opacity between 0.3 and 0.8
+                this.color = `rgba(225, 29, 72, ${this.opacity})`; // Rose-600 color with opacity
+            }
+
+            // Method to draw a heart
+            function drawHeart(x, y, size, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                const topCurveHeight = size * 0.3;
+                ctx.moveTo(x, y + topCurveHeight);
+                // Top left curve
+                ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+                // Bottom left curve
+                ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 2, x, y + size);
+                // Bottom right curve
+                ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 2, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
+                // Top right curve
+                ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Animation loop
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Update and draw each heart
+                hearts.forEach((heart, index) => {
+                    heart.y -= heart.speed;
+                    drawHeart(heart.x, heart.y, heart.size, heart.color);
+
+                    // If heart is off-screen, remove it
+                    if (heart.y + heart.size < 0) {
+                        hearts.splice(index, 1);
+                    }
+                });
+
+                // Add new hearts periodically
+                if (Math.random() > 0.97 && hearts.length < 50) {
+                    hearts.push(new Heart());
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            // Initial setup
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            animate();
+        });
+    </script>
 
 </body>
 </html>
