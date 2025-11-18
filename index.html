@@ -1,249 +1,580 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Love</title>
-    
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Apply custom fonts */
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-        .font-cursive {
-            font-family: 'Dancing Script', cursive;
-        }
+  <meta charset="UTF-8" />
+  <title>For You, With All My Love</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fbe8d2;
+      --bg-soft: #fcefe2;
+      --accent: #ff6b88;
+      --accent-soft: #ff9fb3;
+      --ink: #554348;
+      --gold: #f6c96b;
+      --card-width: 340px;
+      --card-height: 480px;
+      --radius: 18px;
+    }
 
-        /* Canvas for background animation */
-        #hearts-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Place it behind all other content */
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Animation for the reason text */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in {
-            animation: fadeIn 0.8s ease-in-out forwards;
-        }
-    </style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffe8f0, var(--bg));
+      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--ink);
+      padding: 24px 16px 48px;
+    }
+
+    .hint {
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      opacity: 0.75;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-scene {
+      perspective: 1600px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      position: relative;
+      width: var(--card-width);
+      height: var(--card-height);
+      transform-style: preserve-3d;
+      transform: rotateX(12deg) rotateY(-18deg);
+      transition: transform 0.9s ease, box-shadow 0.9s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: rotateX(10deg) rotateY(-12deg) translateY(-4px);
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    .card.open {
+      transform: rotateX(0deg) rotateY(0deg);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.22);
+    }
+
+    .card-shell {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #f2f2f2, #fafafa);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      transform: translateZ(-2px);
+    }
+
+    /* INSIDE OF CARD */
+    .card-inside {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--bg-soft), #ffffff);
+      display: flex;
+      padding: 22px 20px;
+      transform: translateZ(1px);
+      backface-visibility: hidden;
+    }
+
+    .inside-left,
+    .inside-right {
+      flex: 1;
+      border-radius: 14px;
+      min-width: 0;
+    }
+
+    .inside-left {
+      margin-right: 12px;
+      background: linear-gradient(145deg, #f2f2f2, #faf7f1);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .inside-left::before {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.18) 0, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(255, 215, 160, 0.26) 0, transparent 55%);
+      opacity: 0.8;
+    }
+
+    .inside-left-message {
+      position: relative;
+      padding: 20px 18px 14px;
+      font-family: "Playfair Display", serif;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+
+    .inside-left-message span.script {
+      display: block;
+      font-family: "Great Vibes", cursive;
+      font-size: 1.6rem;
+      margin-top: 10px;
+      color: var(--accent);
+    }
+
+    /* Polaroid-style dummy photo inside left */
+    .inside-left-photo {
+      position: relative;
+      padding: 0 18px 16px;
+      z-index: 1;
+    }
+
+    .polaroid {
+      background: #fdfdfd;
+      border-radius: 10px;
+      padding: 8px 8px 12px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    .polaroid img {
+      width: 100%;
+      border-radius: 6px;
+      object-fit: cover;
+      max-height: 150px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .inside-right {
+      background: #fffdf9;
+      box-shadow:
+        0 0 0 1px rgba(232, 209, 169, 0.5),
+        0 12px 22px rgba(0, 0, 0, 0.09);
+      padding: 18px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .inside-heading {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .inside-heading h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .inside-heading h2 {
+      font-family: "Great Vibes", cursive;
+      font-size: 1.7rem;
+      color: #3e3b40;
+    }
+
+    .inside-body {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin: 8px 0 10px;
+      position: relative;
+      padding-left: 8px;
+    }
+
+    .inside-body::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 2px;
+      bottom: 2px;
+      width: 2px;
+      border-radius: 999px;
+      background: linear-gradient(to bottom, var(--accent), var(--gold));
+      opacity: 0.6;
+    }
+
+    .inside-signature {
+      margin-top: 14px;
+      font-family: "Great Vibes", cursive;
+      font-size: 1.3rem;
+      color: var(--accent-soft);
+      text-align: right;
+    }
+
+    .inside-footer {
+      margin-top: 8px;
+      font-size: 0.7rem;
+      text-align: center;
+      opacity: 0.7;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .inside-gallery-strip {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .thumb {
+      aspect-ratio: 3 / 4;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #fce4ec, #ffe0b2);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+      font-size: 0.6rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      text-align: center;
+      padding: 4px;
+      color: #4a3a3e;
+    }
+
+    .thumb span {
+      background: rgba(255, 255, 255, 0.75);
+      padding: 2px 4px;
+      border-radius: 999px;
+      backdrop-filter: blur(4px);
+    }
+
+    .thumb img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* FRONT COVER */
+    .card-front {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      background: #f7f6f3;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transform: rotateY(0deg) translateZ(2px);
+      transition: transform 1s ease-in-out;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.03),
+        0 18px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      z-index: 10;
+      backface-visibility: hidden;
+    }
+
+    .card.open .card-front {
+      transform: rotateY(-180deg) translateZ(2px);
+    }
+
+    .cover-inner {
+      position: relative;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 26px 26px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at top, #ffe3ec, transparent 60%),
+        radial-gradient(circle at 90% 80%, #ffe7c4, transparent 55%),
+        #f8f6f1;
+    }
+
+    .cover-illustration {
+      width: 150px;
+      height: 180px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #78c98f, #4a9665);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      position: relative;
+      box-shadow:
+        0 18px 30px rgba(0, 0, 0, 0.25),
+        0 0 0 6px rgba(255, 255, 255, 0.9);
+      color: #f6f6f6;
+    }
+
+    .cover-illustration::after {
+      content: "★";
+      position: absolute;
+      top: 6px;
+      right: 22px;
+      font-size: 1.3rem;
+      color: var(--gold);
+      text-shadow: 0 0 12px rgba(246, 201, 107, 0.8);
+    }
+
+    .cover-text { text-align: center; }
+
+    .cover-text h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.45rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .cover-text h2 {
+      font-family: "Great Vibes", cursive;
+      font-size: 2.1rem;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .cover-text p {
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, 0.55);
+    }
+
+    .cover-footer {
+      font-size: 0.7rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .floating-heart {
+      position: absolute;
+      font-size: 1.2rem;
+      animation: float 5s ease-in-out infinite;
+      opacity: 0.65;
+    }
+
+    .floating-heart:nth-child(1) { left: 18%; top: 10%; animation-delay: 0s; }
+    .floating-heart:nth-child(2) { right: 20%; top: 18%; animation-delay: 1.2s; }
+    .floating-heart:nth-child(3) { left: 10%; bottom: 12%; animation-delay: 2.4s; }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-16px) scale(1.08); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .below {
+      max-width: 700px;
+      text-align: center;
+    }
+
+    .below h2 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .below p {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .panel {
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+      padding: 12px 12px 14px;
+      backdrop-filter: blur(8px);
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .panel strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .cover-illustration {
+    overflow: hidden; /* keeps image inside the rounded shape */
+    }
+
+    .cover-illustration img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* zoom & crop nicely */
+    border-radius: inherit;
+    display: block;
+    }
+
+    .panel img {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-bottom: 8px;
+      max-height: 180px;
+    }
+
+    @media (max-width: 480px) {
+      :root { --card-width: 290px; --card-height: 420px; }
+      .inside-left-message { font-size: 0.9rem; }
+      .inside-heading h1 { font-size: 1.1rem; }
+      .inside-heading h2 { font-size: 1.5rem; }
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-pink-200 via-rose-200 to-indigo-200 text-gray-800">
+<body>
+  <div class="hint">Tap / click the card to open it 💖</div>
 
-    <!-- Canvas for the floating hearts animation -->
-    <canvas id="hearts-canvas"></canvas>
+  <div class="card-scene">
+    <div class="card" id="love-card">
+      <div class="card-shell"></div>
 
-    <div class="container mx-auto px-4 py-8 sm:py-16 text-center relative z-10">
+      <!-- INSIDE OF CARD -->
+      <div class="card-inside">
+        <!-- LEFT SIDE -->
+        <div class="inside-left">
 
-        <!-- Main Title -->
-        <header class="mb-12">
-            <h1 class="font-cursive text-5xl sm:text-7xl text-rose-600 drop-shadow-lg">To the Love of My Life</h1>
-            <!-- TODO: Replace 'Your Girlfriend's Name' with her actual name -->
-            <p class="text-2xl mt-2 text-gray-700">A little something for my favorite person : Sana</p>
-        </header>
-
-        <!-- A Personal Message -->
-        <section class="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl mb-12">
-            <h2 class="text-2xl font-semibold text-rose-500 mb-4">My Dearest,</h2>
-            <!-- TODO: Write your own personal message here -->
-            <p class="text-lg leading-relaxed">
-                Ever since you came into my life, every day has felt like a beautiful dream. This is just a small way to show you a fraction of how much you mean to me. You are my sunshine, my best friend, and my everything.
-            </p>
-        </section>
-
-        <!-- Interactive "Reasons I Love You" Section -->
-        <section class="max-w-3xl mx-auto bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl mb-12">
-            <h2 class="text-2xl font-semibold text-rose-500 mb-4">A Few Reasons Why I Love You...</h2>
-            <p class="mb-6">There are a million reasons, but here are a few to start. Click the button!</p>
-            
-            <button id="reason-button" class="bg-rose-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-rose-600 transform hover:scale-105 transition-all duration-300 ease-in-out">
-                Tell Me Why!
-            </button>
-
-            <div id="reason-display" class="mt-6 min-h-[6rem] flex items-center justify-center p-4 bg-rose-100 rounded-lg">
-                <p class="text-xl text-rose-700 font-semibold">Your reason will appear here...</p>
+            <div class="inside-left-message" style="font-size:0.8rem; line-height:1.5;">
+            To my Sana a.k.a my Bebu,
+            <br><br>
+            I know there’s distance between our hands,
+            but never between our hearts.
+            <br>
+            Thank you for loving me through pixels, time zones.
+            <span class="script">I’d choose you in every universe.</span>
             </div>
-        </section>
 
-        <!-- Photo Gallery -->
-        <section class="max-w-4xl mx-auto">
-            <h2 class="font-cursive text-4xl sm:text-5xl text-rose-600 mb-8">Our Beautiful Moments</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <!-- TODO: Replace these placeholder images with your own photos -->
-                <!-- For each image, change the src="..." to the path of your photo -->
-                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
-                    <img src="https://github.com/Zahid8/Zahid8.github.io/blob/main/IMG_6846.jpeg" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/fecdd3/be123c?text=Replace+Me';">
-                </div>
-                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 sm:mt-8">
-                    <img src="https://github.com/Zahid8/Zahid8.github.io/blob/main/IMG_7444.jpeg" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/fbcfe8/86198f?text=Replace+Me';">
-                </div>
-                <div class="bg-white p-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
-                    <img src="https://github.com/Zahid8/Zahid8.github.io/blob/main/IMG_7633.png" alt="A cherished memory" class="rounded-md w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600/f5d0fe/701a75?text=Replace+Me';">
-                </div>
+
+          <!-- Dummy photo -->
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="inside-right">
+          <div>
+            <div class="inside-heading">
+              <h1>You're My Universe</h1>
             </div>
-        </section>
 
-        <!-- Final Message -->
-        <footer class="mt-16">
-            <p class="text-xl font-semibold text-gray-700">With all my love, forever and always,</p>
-            <!-- TODO: Replace with your name -->
-            <p class="font-cursive text-4xl text-rose-600 mt-2">Your Zahid</p>
-        </footer>
+                <div class="inside-body" style="font-size:0.6rem; line-height:1.6;">
+                Dear <strong>Bebu</strong>,<br>
+                Somehow, even when you’re far away, I still feel
+                your presence in all the tiny things.
+                <br><br>
+                One day we’ll laugh about our “Wi-Fi romance”
+                while we’re cooking together in the same kitchen.
+                Until then, this little website-card is my hug
+                that never runs out of battery  ❤️
+                </div>
 
+
+            <div class="inside-gallery-strip">
+              <div class="thumb">
+                <!-- Replace with her picture -->
+                <img src="first1.JPG" alt="Her smile"> 
+                <!-- <span>Her smile ✨</span> -->
+              </div>
+              <div class="thumb">
+                <img src="mid1.PNG" alt="Your drawing">
+                <!-- <span>Your drawing 🎨</span> -->
+              </div>
+              <div class="thumb">
+                <img src="last1.JPG" alt="Memory">
+                <!-- <span>Our moment 📸</span> -->
+              </div>
+            </div>
+
+            <div class="inside-signature" style="font-size:0.8rem; line-height:1.6;">
+              With all my love,<br>
+              <span>Your Zahid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FRONT COVER -->
+      <div class="card-front">
+        <div class="cover-inner">
+          <div class="floating-heart">❤</div>
+          <div class="floating-heart">🩷</div>
+          <!-- <div class="floating-heart">💛</div> -->
+
+            <div class="cover-illustration">
+            <img src="cover.JPG" alt="My favourite person">
+            </div>
+
+          <div class="cover-text">
+            <h1>Wish This Was Paper</h1>
+            <h2>But You’re Worth a Website</h2>
+            <p>I can’t hand you a real card, so I coded you this one.</p>
+          </div>
+
+          <div class="cover-footer">
+            made with love, across the distance
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Interactive Reasons Logic ---
-            const reasonButton = document.getElementById('reason-button');
-            const reasonDisplay = document.getElementById('reason-display');
-            
-            // TODO: Add your own reasons to this list!
-const reasons = [
-  "I love the way you laugh at my jokes.",
-  "I love how your smile warms my heart.",
-  "I love that you always remember the little things about me.",
-  "I love when you squeeze my hand during a movie.",
-  "I love the sparkle in your eyes when you are excited.",
-  "I love that you check in on me and are concerned.",
-  "I love the way you tuck your hair behind your ear.",
-  "I love the way you accompany me in the night.",
-  "I love how we fall asleep listening to each other.",
-  "I love how you stay up late just to talk.",
-  "I love the way you blush when you are shy.",
-  "I love that you send me reels and posts and it lights up my heart.",
-  "I love how you remember my coffee.",
-  "I love that you trust me with your secrets.",
-  "I love the way you plan surprises.",
-  "I love how you brighten every room you walk into.",
-  "I love that you listen without judging.",
-  "I love your passion for the things you love.",
-  "I love the way you look at our photos and smile.",
-  "I love when you read my mind.",
-  "I love how you take care of me.",
-  "I love how your hugs feel like home.",
-  "I love the way your eyes sparkle when you tell me something.",
-  "I love the way you pull my hands down when you are excited.",
-  "I love how you forgive me for my mistakes.",
-  "I love that you call me just to hear my voice.",
-  "I love the way your laughter fills the air.",
-  "I love how you surprise me with coconut water.",
-  "I love how we kiss.",
-  "I love how you look at me like Im your whole world.",
-  "I love that you share your dreams with me.",
-  "I love how you hold my hand while we walk.",
-  "I love how you comfort me in silence.",
-  "I love how you help me see the bright side.",
-  "I love how you wink at me teasingly.",
-  "I love how you always smell so good.",
-  "I love how you let me be silly.",
-  "I love that you make even simple moments unforgettable.",
-  "I love how your values guide everything you do and how you care so deeply for the world around you."
-];
+  <!-- OPTIONAL BELOW SECTION -->
+  <section class="below">
+    <h2>Little Pieces of Our Story</h2>
+        <p>
+        I am so endlessly proud of you, of everything you’ve done, everything you’ve survived,
+        and everything you’re still becoming. Every goal you chase, every step you take makes me fall even more in love with you. One day, all of these moments will
+        be our favourite stories to look back on together 💖
+        </p>
+    <div class="grid">
+      <article class="panel">
 
+        <img src="first.png" alt="Us together">
+        <p>The moment I realised that “home” is not a place, it’s you.</p>
+      </article>
 
-            let lastReasonIndex = -1;
+      <article class="panel">
 
-            reasonButton.addEventListener('click', () => {
-                let randomIndex;
-                // Simple logic to avoid showing the same reason twice in a row
-                do {
-                    randomIndex = Math.floor(Math.random() * reasons.length);
-                } while (randomIndex === lastReasonIndex);
-                
-                lastReasonIndex = randomIndex;
-                const reason = reasons[randomIndex];
-                
-                // Add a fade-in animation by reapplying a class
-                reasonDisplay.innerHTML = `<p class="text-xl text-rose-700 font-semibold">${reason}</p>`;
-                reasonDisplay.firstChild.classList.remove('fade-in');
-                // This little trick forces a reflow, allowing the animation to restart
-                void reasonDisplay.firstChild.offsetWidth; 
-                reasonDisplay.firstChild.classList.add('fade-in');
-            });
+        <img src="mid.JPG" alt="Us together">
+        <p>A framed memory on our wall someday.</p>
+      </article>
 
-            // --- Floating Hearts Animation ---
-            const canvas = document.getElementById('hearts-canvas');
-            const ctx = canvas.getContext('2d');
-            let hearts = [];
+      <article class="panel">
 
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
+        <img src="last.png" alt="Us together">
+        <p>Proof that distance can’t dim how bright you are. I’m so proud of you.</p>
+      </article>
+    </div>
+  </section>
 
-            // Heart object
-            function Heart() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 100; // Start below the screen
-                this.size = Math.random() * 20 + 10; // Size between 10 and 30
-                this.speed = Math.random() * 2 + 1; // Speed between 1 and 3
-                this.opacity = Math.random() * 0.5 + 0.3; // Opacity between 0.3 and 0.8
-                this.color = `rgba(225, 29, 72, ${this.opacity})`; // Rose-600 color with opacity
-            }
-
-            // Method to draw a heart
-            function drawHeart(x, y, size, color) {
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                const topCurveHeight = size * 0.3;
-                ctx.moveTo(x, y + topCurveHeight);
-                // Top left curve
-                ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
-                // Bottom left curve
-                ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 2, x, y + size);
-                // Bottom right curve
-                ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 2, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
-                // Top right curve
-                ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
-                ctx.closePath();
-                ctx.fill();
-            }
-            
-            // Animation loop
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Update and draw each heart
-                hearts.forEach((heart, index) => {
-                    heart.y -= heart.speed;
-                    drawHeart(heart.x, heart.y, heart.size, heart.color);
-
-                    // If heart is off-screen, remove it
-                    if (heart.y + heart.size < 0) {
-                        hearts.splice(index, 1);
-                    }
-                });
-
-                // Add new hearts periodically
-                if (Math.random() > 0.97 && hearts.length < 50) {
-                    hearts.push(new Heart());
-                }
-
-                requestAnimationFrame(animate);
-            }
-
-            // Initial setup
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-            animate();
-        });
-    </script>
-
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const card = document.getElementById("love-card");
+      card.addEventListener("click", function () {
+        card.classList.toggle("open");
+      });
+    });
+  </script>
 </body>
 </html>
