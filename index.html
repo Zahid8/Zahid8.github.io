@@ -2,599 +2,561 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>For You, With All My Love</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>For You ❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --bg: #fbe8d2;
-      --bg-soft: #fcefe2;
-      --accent: #ff6b88;
-      --accent-soft: #ff9fb3;
-      --ink: #554348;
-      --gold: #f6c96b;
-      --card-width: 340px;
-      --card-height: 480px;
-      --radius: 18px;
+      --bg: #0f172a;
+      --accent: #f97373;
+      --card: #111827;
+      --text: #e5e7eb;
+      --soft: #9ca3af;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: var(--text);
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .wrapper {
+      max-width: 900px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at top, #ffe8f0, var(--bg));
-      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
-      color: var(--ink);
-      padding: 24px 16px 48px;
+      gap: 16px;
     }
 
-    .hint {
-      margin-bottom: 18px;
-      font-size: 0.9rem;
-      opacity: 0.75;
-      letter-spacing: 0.08em;
+    .title {
+      text-align: center;
+    }
+
+    .title h1 {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    .card-scene {
-      perspective: 1600px;
-      margin-bottom: 40px;
+    .title h1 span {
+      color: var(--accent);
+    }
+
+    .title p {
+      margin-top: 8px;
+      color: var(--soft);
+      font-size: 0.95rem;
     }
 
     .card {
-      position: relative;
-      width: var(--card-width);
-      height: var(--card-height);
-      transform-style: preserve-3d;
-      transform: rotateX(12deg) rotateY(-18deg);
-      transition: transform 0.9s ease, box-shadow 0.9s ease;
-      cursor: pointer;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      padding: 18px 18px 22px;
+      width: 100%;
+      max-width: 520px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      backdrop-filter: blur(18px);
     }
 
-    .card:hover {
-      transform: rotateX(10deg) rotateY(-12deg) translateY(-4px);
-      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.18);
-    }
-
-    .card.open {
-      transform: rotateX(0deg) rotateY(0deg);
-      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.22);
-    }
-
-    .card-shell {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #f2f2f2, #fafafa);
-      border-radius: var(--radius);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
-      overflow: hidden;
-      transform: translateZ(-2px);
-    }
-
-    /* INSIDE OF CARD */
-    .card-inside {
-      position: absolute;
-      inset: 0;
-      border-radius: var(--radius);
-      background: linear-gradient(135deg, var(--bg-soft), #ffffff);
+    .card-header {
       display: flex;
-      padding: 22px 20px;
-      transform: translateZ(1px);
-      backface-visibility: hidden;
-    }
-
-    .inside-left,
-    .inside-right {
-      flex: 1;
-      border-radius: 14px;
-      min-width: 0;
-    }
-
-    .inside-left {
-      margin-right: 12px;
-      background: linear-gradient(145deg, #f2f2f2, #faf7f1);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--soft);
     }
 
-    .inside-left::before {
-      content: "";
-      position: absolute;
-      inset: -40px;
-      background:
-        radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.18) 0, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(255, 215, 160, 0.26) 0, transparent 55%);
-      opacity: 0.8;
-    }
-
-    .inside-left-message {
-      position: relative;
-      padding: 20px 18px 14px;
-      font-family: "Playfair Display", serif;
-      font-size: 0.98rem;
-      line-height: 1.6;
-    }
-
-    .inside-left-message span.script {
-      display: block;
-      font-family: "Great Vibes", cursive;
-      font-size: 1.6rem;
-      margin-top: 10px;
-      color: var(--accent);
-    }
-
-    /* Polaroid-style dummy photo inside left */
-    .inside-left-photo {
-      position: relative;
-      padding: 0 18px 16px;
-      z-index: 1;
-    }
-
-    .polaroid {
-      background: #fdfdfd;
-      border-radius: 10px;
-      padding: 8px 8px 12px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-      text-align: center;
-      font-size: 0.75rem;
-    }
-
-  .panel1 img {
-  width: 100%;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important;  
-  border-radius: 12px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-
-    .polaroid img {
-      width: 100%;
-      border-radius: 6px;
-      object-fit: cover;
-      max-height: 150px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .inside-right {
-      background: #fffdf9;
-      box-shadow:
-        0 0 0 1px rgba(232, 209, 169, 0.5),
-        0 12px 22px rgba(0, 0, 0, 0.09);
-      padding: 18px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .inside-heading {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .inside-heading h1 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.25rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .inside-heading h2 {
-      font-family: "Great Vibes", cursive;
-      font-size: 1.7rem;
-      color: #3e3b40;
-    }
-
-    .inside-body {
-      font-size: 0.92rem;
-      line-height: 1.7;
-      margin: 8px 0 10px;
-      position: relative;
-      padding-left: 8px;
-    }
-
-    .inside-body::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 2px;
-      bottom: 2px;
-      width: 2px;
+    .status-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 999px;
-      background: linear-gradient(to bottom, var(--accent), var(--gold));
-      opacity: 0.6;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
     }
 
-    .inside-signature {
-      margin-top: 14px;
-      font-family: "Great Vibes", cursive;
-      font-size: 1.3rem;
-      color: var(--accent-soft);
-      text-align: right;
-    }
-
-    .inside-footer {
-      margin-top: 8px;
-      font-size: 0.7rem;
-      text-align: center;
-      opacity: 0.7;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .inside-gallery-strip {
-      margin-top: 8px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    .thumb {
-      aspect-ratio: 3 / 4;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-      background: linear-gradient(135deg, #fce4ec, #ffe0b2);
-      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
-      font-size: 0.6rem;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      text-align: center;
-      padding: 4px;
-      color: #4a3a3e;
-    }
-
-    .thumb span {
-      background: rgba(255, 255, 255, 0.75);
-      padding: 2px 4px;
-      border-radius: 999px;
-      backdrop-filter: blur(4px);
-    }
-
-    .thumb img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* FRONT COVER */
-    .card-front {
-      position: absolute;
-      inset: 0;
-      border-radius: var(--radius);
-      background: #f7f6f3;
-      transform-origin: left center;
-      transform-style: preserve-3d;
-      transform: rotateY(0deg) translateZ(2px);
-      transition: transform 1s ease-in-out;
-      box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.03),
-        0 18px 40px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      z-index: 10;
-      backface-visibility: hidden;
-    }
-
-    .card.open .card-front {
-      transform: rotateY(-180deg) translateZ(2px);
-    }
-
-    .cover-inner {
-      position: relative;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      padding: 26px 26px 22px;
+    .puzzle-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      background:
-        radial-gradient(circle at top, #ffe3ec, transparent 60%),
-        radial-gradient(circle at 90% 80%, #ffe7c4, transparent 55%),
-        #f8f6f1;
+      gap: 12px;
     }
 
-    .cover-illustration {
-      width: 150px;
-      height: 180px;
-      border-radius: 999px;
-      background: linear-gradient(145deg, #78c98f, #4a9665);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 5rem;
-      position: relative;
-      box-shadow:
-        0 18px 30px rgba(0, 0, 0, 0.25),
-        0 0 0 6px rgba(255, 255, 255, 0.9);
-      color: #f6f6f6;
-    }
-
-    .cover-illustration::after {
-      content: "★";
-      position: absolute;
-      top: 6px;
-      right: 22px;
-      font-size: 1.3rem;
-      color: var(--gold);
-      text-shadow: 0 0 12px rgba(246, 201, 107, 0.8);
-    }
-
-    .cover-text { text-align: center; }
-
-    .cover-text h1 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.45rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--ink);
-      margin-bottom: 3px;
-    }
-
-    .cover-text h2 {
-      font-family: "Great Vibes", cursive;
-      font-size: 2.1rem;
-      color: var(--accent);
-      margin-bottom: 2px;
-    }
-
-    .cover-text p {
-      font-size: 0.8rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(0, 0, 0, 0.55);
-    }
-
-    .cover-footer {
-      font-size: 0.7rem;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      opacity: 0.7;
-    }
-
-    .floating-heart {
-      position: absolute;
-      font-size: 1.2rem;
-      animation: float 5s ease-in-out infinite;
-      opacity: 0.65;
-    }
-
-    .floating-heart:nth-child(1) { left: 18%; top: 10%; animation-delay: 0s; }
-    .floating-heart:nth-child(2) { right: 20%; top: 18%; animation-delay: 1.2s; }
-    .floating-heart:nth-child(3) { left: 10%; bottom: 12%; animation-delay: 2.4s; }
-
-    @keyframes float {
-      0% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-16px) scale(1.08); }
-      100% { transform: translateY(0) scale(1); }
-    }
-
-    .below {
-      max-width: 700px;
-      text-align: center;
-    }
-
-    .below h2 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.4rem;
-      margin-bottom: 10px;
-    }
-
-    .below p {
-      font-size: 0.95rem;
-      opacity: 0.8;
-      margin-bottom: 16px;
-    }
-
-    .grid {
+    #puzzle {
+      width: min(80vmin, 420px);
+      aspect-ratio: 1 / 1;
       display: grid;
-      gap: 14px;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    }
-
-    .panel {
+      /* more pieces: 6 x 6 */
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 2px;
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
-      padding: 12px 12px 14px;
-      backdrop-filter: blur(8px);
-      text-align: left;
+      overflow: hidden;
+      border: 2px solid rgba(148, 163, 184, 0.4);
+      background: #020617;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    .tile {
+      position: relative;
+      cursor: pointer;
+      background-image: url("us.JPG");
+      /* more pieces: background-size matches 6 x 6 */
+      background-size: 600% 600%;
+      background-repeat: no-repeat;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, filter 0.15s ease-out;
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+      filter: brightness(1.07);
+    }
+
+    .tile.selected {
+      outline: 2px solid var(--accent);
+      z-index: 2;
+      filter: brightness(1.1);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(248, 113, 113, 0.45);
+    }
+
+    .puzzle-meta {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 420px;
+      font-size: 0.85rem;
+      color: var(--soft);
+    }
+
+    .puzzle-meta strong {
+      color: var(--accent);
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--soft);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .hint span {
+      color: var(--accent);
+    }
+
+    /* Letter overlay */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 16px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .overlay-inner {
+      position: relative;
+      max-width: 480px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .overlay-hearts {
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      opacity: 0;
+      animation: float-in 0.9s ease-out forwards;
+    }
+
+    .letter {
+      width: 100%;
+      background: #fdf7f2;
+      border-radius: 18px;
+      padding: 22px 20px 26px;
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.55);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center;
+      opacity: 0;
+      animation: letter-pop 0.7s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    .letter::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(248, 113, 113, 0.09), transparent 45%),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(248, 113, 113, 0.22),
+          rgba(248, 113, 113, 0.22) 1px,
+          transparent 1px,
+          transparent 11px
+        );
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      color: #4b5563;
       font-size: 0.85rem;
     }
 
-    .panel strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .stamp {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 2px dashed rgba(248, 113, 113, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
     }
 
-    .cover-illustration {
-    overflow: hidden; /* keeps image inside the rounded shape */
+    .letter-body {
+      position: relative;
+      z-index: 1;
+      margin-top: 6px;
+      color: #374151;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: text-reveal 0.9s ease-out forwards;
+      animation-delay: 0.8s;
     }
 
-    .cover-illustration img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;  /* zoom & crop nicely */
-    border-radius: inherit;
-    display: block;
+    .letter-body p + p {
+      margin-top: 10px;
     }
 
-    .panel img {
-      width: 100%;
-      border-radius: 12px;
-      object-fit: cover;
-      margin-bottom: 8px;
-      max-height: 180px;
+    .letter-body .signature {
+      margin-top: 16px;
+      font-weight: 600;
+      color: #111827;
+      font-size: 1.02rem;
     }
 
-    @media (max-width: 480px) {
-      :root { --card-width: 290px; --card-height: 420px; }
-      .inside-left-message { font-size: 0.9rem; }
-      .inside-heading h1 { font-size: 1.1rem; }
-      .inside-heading h2 { font-size: 1.5rem; }
+    .overlay-note {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--soft);
+      text-align: center;
+      opacity: 0;
+      animation: fade-in 0.75s ease-out forwards;
+      animation-delay: 1.2s;
+    }
+
+    .close-btn {
+      margin-top: 10px;
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      color: var(--soft);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: background 0.18s ease-out, border-color 0.18s ease-out, transform 0.12s ease-out;
+    }
+
+    .close-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      color: #e5e7eb;
+    }
+
+    /* Animations */
+
+    @keyframes float-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes letter-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-8px) scale(1.02);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes text-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 14px 12px 18px;
+      }
+      #puzzle {
+        width: min(85vmin, 360px);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="hint">Tap / click the card to open it 💖</div>
+  <div class="wrapper">
+    <div class="title">
+      <h1>For <span>the love of my life</span> 💌</h1>
+      <p>Put us back together, piece by piece, to unlock a little secret from my heart.</p>
+    </div>
 
-  <div class="card-scene">
-    <div class="card" id="love-card">
-      <div class="card-shell"></div>
-
-      <!-- INSIDE OF CARD -->
-      <div class="card-inside">
-        <!-- LEFT SIDE -->
-        <div class="inside-left">
-
-            <div class="inside-left-message" style="font-size:0.7rem; line-height:1.5;">
-            To my Sana,
-            <br><br>
-            I know there’s distance between our hands,
-            but never between our hearts.
-            <br>
-            Thank you for loving me through pixels, time zones.
-            I know I can be frustrating and I test your patience far too often!
-            <span class="script">I’d choose you in every universe.</span>
-            </div>
-
-
-          <!-- Dummy photo -->
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="status-dot"></div>
+          <span>أنت قلبي</span>
         </div>
+        <span>Swap two pieces to rearrange</span>
+      </div>
 
-        <!-- RIGHT SIDE -->
-        <div class="inside-right">
-          <div>
-            <div class="inside-heading">
-              <h1>You're My Universe</h1>
-            </div>
-
-                <div class="inside-body" style="font-size:0.6rem; line-height:1.6;">
-                Dear <strong>Bebu</strong>,<br>
-                Somehow, even when you’re far away, I still feel
-                your presence in all the tiny things.
-                <br><br>
-                One day we’ll laugh about our “Wi-Fi romance”
-                while we’re cooking together in the same kitchen.
-                Until then, this little website-card is my hug
-                that never runs out of battery  ❤️
-                </div>
-
-
-            <div class="inside-gallery-strip">
-              <div class="thumb">
-                <!-- Replace with her picture -->
-                <img src="./first1.JPG" alt="Her smile"> 
-                <!-- <span>Her smile ✨</span> -->
-              </div>
-              <div class="thumb">
-                <img src="./mid1.PNG" alt="Your drawing">
-                <!-- <span>Your drawing 🎨</span> -->
-              </div>
-              <div class="thumb">
-                <img src="./last1.JPG" alt="Memory">
-                <!-- <span>Our moment 📸</span> -->
-              </div>
-            </div>
-
-            <div class="inside-signature" style="font-size:0.8rem; line-height:1.6;">
-              With all my love,<br>
-              <span>Your Zahid</span>
-            </div>
-          </div>
+      <div class="puzzle-wrapper">
+        <div id="puzzle"></div>
+        <div class="puzzle-meta">
+          <!-- label updated -->
+          <span>Pieces: <strong>6 × 6</strong></span>
+          <span id="moves">Moves: <strong>0</strong></span>
         </div>
       </div>
 
-      <!-- FRONT COVER -->
-      <div class="card-front">
-        <div class="cover-inner">
-          <div class="floating-heart">❤</div>
-          <div class="floating-heart">🩷</div>
-          <!-- <div class="floating-heart">💛</div> -->
-
-            <div class="cover-illustration">
-            <img src="./cover.JPG" alt="My favourite person">
-            </div>
-
-          <div class="cover-text">
-            <h1>Wish This Was Paper</h1>
-            <h2>But You’re Worth a Website</h2>
-            <p>I can’t hand you a real card, so I coded you this one.</p>
-          </div>
-
-          <div class="cover-footer">
-            made with love, across the distance
-          </div>
-        </div>
-      </div>
+      <p class="hint">
+        Tap/click a piece, then another one to <span>swap</span> them.  
+        When the picture is complete, my secret appears. 
+      </p>
     </div>
   </div>
 
-  <!-- OPTIONAL BELOW SECTION -->
-  <section class="below">
-    <h2>Little Pieces of Our Story</h2>
-        <p>
-        I am so endlessly proud of you, of everything you’ve done, everything you’ve survived,
-        and everything you’re still becoming. Every goal you chase, every step you take makes me fall even more in love with you. One day, all of these moments will
-        be our favourite stories to look back on together 💖
-        </p>
+  <!-- Letter overlay -->
+  <div class="overlay" id="letterOverlay">
+    <div class="overlay-inner">
+      <div class="overlay-hearts">♡ ♡ ♡</div>
 
-            <article class="panel1">
-        <div class="panel-image">
-            <img src="draw.jpg" alt="Us together">
+      <div class="letter">
+        <div class="letter-header">
+          <div>
+            <div style="font-weight:600; text-transform:uppercase; letter-spacing:0.12em; font-size:0.72rem;">
+              TO:
+            </div>
+            <div style="margin-top:2px; font-weight:500;">إلى قلبي وروحي “To my heart and soul”</div>
+          </div>
+          <div class="stamp">💌</div>
         </div>
-        </article>
 
-    
-    <div class="grid">
-      <article class="panel">
+        <div class="letter-body">
+          
+          <p>
+            Dear Bebu,  
+            you just solved this little puzzle, the same way you keep solving life with me, one sweet moment at a time.
+          </p>
+          <p>
+            Every tiny piece of this picture is a reason I’m so grateful for you: your smile, your patience, your chaos, your kindness…your EVERYTHING…
+            all of it fits perfectly with me.
+          </p>
+          <p>
+            No matter how scrambled things get, I always want to end up right next to you, in every picture, every plan, every version of the future.
+          </p>
+          <p class="signature">
+            It has always been YOU. It’s YOU or no one.,  
+            <span></span>
+          </p>
+        </div>
+      </div>
 
-        <img src="first.png" alt="Us together">
-        <p>The moment I realised that “home” is not a place, it’s you.</p>
-      </article>
+      <div class="overlay-note">
+        (You can tap outside or press this button if you want to see the puzzle again.)
+      </div>
 
-      <article class="panel">
-
-        <img src="mid.JPG" alt="Us together">
-        <p>A framed memory on our wall someday.</p>
-      </article>
-
-      <article class="panel">
-
-        <img src="last.png" alt="Us together">
-        <p>Proof that distance can’t dim how bright you are. I’m so proud of you.</p>
-      </article>
+      <button class="close-btn" id="closeOverlay">Back to the puzzle</button>
     </div>
-  </section>
+  </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const card = document.getElementById("love-card");
-      card.addEventListener("click", function () {
-        card.classList.toggle("open");
+    (function () {
+      // more pieces here
+      const rows = 6;
+      const cols = 6;
+      const total = rows * cols;
+      const puzzle = document.getElementById("puzzle");
+      const movesLabel = document.getElementById("moves");
+      const overlay = document.getElementById("letterOverlay");
+      const closeOverlay = document.getElementById("closeOverlay");
+
+      let selectedTile = null;
+      let moves = 0;
+
+      function shuffle(array) {
+        // Fisher-Yates shuffle
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function createPuzzle() {
+        const indices = Array.from({ length: total }, (_, i) => i);
+        let shuffled = shuffle(indices.slice());
+
+        // Ensure it's not already solved (rare but possible)
+        while (shuffled.every((val, idx) => val === idx)) {
+          shuffled = shuffle(indices.slice());
+        }
+
+        puzzle.innerHTML = "";
+        moves = 0;
+        updateMoves();
+
+        shuffled.forEach((index) => {
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          tile.dataset.index = index;
+
+          const row = Math.floor(index / cols);
+          const col = index % cols;
+          const x = (col / (cols - 1)) * 100;
+          const y = (row / (rows - 1)) * 100;
+          tile.style.backgroundPosition = `${x}% ${y}%`;
+
+          tile.addEventListener("click", () => handleTileClick(tile));
+          puzzle.appendChild(tile);
+        });
+      }
+
+      function handleTileClick(tile) {
+        if (!selectedTile) {
+          selectedTile = tile;
+          tile.classList.add("selected");
+          return;
+        }
+
+        if (tile === selectedTile) {
+          // Unselect if same tile clicked again
+          tile.classList.remove("selected");
+          selectedTile = null;
+          return;
+        }
+
+        // Swap the two tiles in the DOM
+        swapTiles(selectedTile, tile);
+        selectedTile.classList.remove("selected");
+        selectedTile = null;
+
+        moves += 1;
+        updateMoves();
+        checkSolved();
+      }
+
+      function swapTiles(tileA, tileB) {
+        const parent = tileA.parentNode;
+        const temp = document.createElement("div");
+
+        parent.insertBefore(temp, tileA);
+        parent.insertBefore(tileA, tileB);
+        parent.insertBefore(tileB, temp);
+        parent.removeChild(temp);
+      }
+
+      function updateMoves() {
+        movesLabel.innerHTML = `Moves: <strong>${moves}</strong>`;
+      }
+
+      function checkSolved() {
+        const tiles = Array.from(puzzle.children);
+        const solved = tiles.every((tile, position) => {
+          return Number(tile.dataset.index) === position;
+        });
+
+        if (solved) {
+          setTimeout(showLetter, 400); // little delay for satisfaction
+        }
+      }
+
+      function showLetter() {
+        overlay.classList.add("show");
+      }
+
+      function hideLetter() {
+        overlay.classList.remove("show");
+      }
+
+      // Clicking outside inner letter also closes
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          hideLetter();
+        }
       });
-    });
+
+      closeOverlay.addEventListener("click", hideLetter);
+
+      // Init
+      createPuzzle();
+    })();
   </script>
 </body>
 </html>
