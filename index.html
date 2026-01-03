@@ -1,562 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>For You ❤️</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    :root {
-      --bg: #0f172a;
-      --accent: #f97373;
-      --card: #111827;
-      --text: #e5e7eb;
-      --soft: #9ca3af;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Story</title>
+    <style>
+        /* --- 1. VISUAL SETUP --- */
+        :root {
+            --primary: #ff6b6b; /* Soft Red */
+            --secondary: #4ecdc4; /* Teal */
+            --bg: #f7f9fc;
+            --text: #2d3436;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-    .wrapper {
-      max-width: 900px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
+        h1 { color: var(--primary); margin-bottom: 10px; }
+        p.subtitle { color: #888; font-style: italic; }
 
-    .title {
-      text-align: center;
-    }
+        /* --- 2. TIMELINE STYLES --- */
+        .timeline {
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+            padding: 20px 0;
+        }
 
-    .title h1 {
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
+        /* The vertical line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px; /* Adjust for mobile alignment */
+            width: 4px;
+            background: #ddd;
+            border-radius: 2px;
+        }
 
-    .title h1 span {
-      color: var(--accent);
-    }
+        /* The individual memory card container */
+        .milestone {
+            position: relative;
+            margin-bottom: 50px;
+            padding-left: 60px; /* Space for the dot */
+            opacity: 0.5; /* Dimmed by default (locked) */
+            transition: all 0.5s ease;
+            filter: blur(4px); /* Blurred by default */
+            pointer-events: none; /* Not clickable when locked */
+        }
 
-    .title p {
-      margin-top: 8px;
-      color: var(--soft);
-      font-size: 0.95rem;
-    }
+        /* The "Active" (Current Challenge) State */
+        .milestone.active {
+            opacity: 1;
+            filter: blur(0);
+            pointer-events: auto;
+            transform: scale(1.02);
+        }
 
-    .card {
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 20px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
-      padding: 18px 18px 22px;
-      width: 100%;
-      max-width: 520px;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      backdrop-filter: blur(18px);
-    }
+        /* The "Unlocked" (Completed) State */
+        .milestone.unlocked {
+            opacity: 1;
+            filter: blur(0);
+            pointer-events: auto;
+        }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: var(--soft);
-    }
+        /* The Dot on the line */
+        .dot {
+            position: absolute;
+            left: 11px; /* Center on the line */
+            top: 0;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #bbb;
+            border: 4px solid var(--bg);
+            z-index: 2;
+            transition: background 0.3s;
+        }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
-    }
+        .milestone.unlocked .dot, .milestone.active .dot {
+            background: var(--primary);
+        }
 
-    .puzzle-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
+        /* The Content Card */
+        .content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
 
-    #puzzle {
-      width: min(80vmin, 420px);
-      aspect-ratio: 1 / 1;
-      display: grid;
-      /* more pieces: 6 x 6 */
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      gap: 2px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 2px solid rgba(148, 163, 184, 0.4);
-      background: #020617;
-      position: relative;
-      touch-action: manipulation;
-    }
+        .date {
+            font-size: 0.85em;
+            color: var(--primary);
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
 
-    .tile {
-      position: relative;
-      cursor: pointer;
-      background-image: url("./us.jpg");
-      /* more pieces: background-size matches 6 x 6 */
-      background-size: 600% 600%;
-      background-repeat: no-repeat;
-      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, filter 0.15s ease-out;
-    }
+        .hidden-memory {
+            display: none; /* Hidden until unlocked */
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .memory-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
 
-    .tile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-      filter: brightness(1.07);
-    }
+        /* --- 3. THE QUIZ UI --- */
+        .quiz-section {
+            background: #fff0f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px dashed var(--primary);
+        }
 
-    .tile.selected {
-      outline: 2px solid var(--accent);
-      z-index: 2;
-      filter: brightness(1.1);
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 10px 20px rgba(248, 113, 113, 0.45);
-    }
+        input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 60%;
+        }
 
-    .puzzle-meta {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 420px;
-      font-size: 0.85rem;
-      color: var(--soft);
-    }
+        button {
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-    .puzzle-meta strong {
-      color: var(--accent);
-    }
+        .error-msg {
+            color: red;
+            font-size: 0.8em;
+            display: none;
+            margin-top: 5px;
+        }
 
-    .hint {
-      font-size: 0.85rem;
-      color: var(--soft);
-      text-align: center;
-      margin-top: 6px;
-    }
+        /* --- 4. FINAL REVEAL --- */
+        #final-message {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.2);
+            animation: popIn 1s ease;
+        }
 
-    .hint span {
-      color: var(--accent);
-    }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-    /* Letter overlay */
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      padding: 16px;
-    }
-
-    .overlay.show {
-      display: flex;
-    }
-
-    .overlay-inner {
-      position: relative;
-      max-width: 480px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .overlay-hearts {
-      font-size: 1.1rem;
-      letter-spacing: 0.3em;
-      color: var(--accent);
-      opacity: 0;
-      animation: float-in 0.9s ease-out forwards;
-    }
-
-    .letter {
-      width: 100%;
-      background: #fdf7f2;
-      border-radius: 18px;
-      padding: 22px 20px 26px;
-      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.55);
-      position: relative;
-      overflow: hidden;
-      transform-origin: center;
-      opacity: 0;
-      animation: letter-pop 0.7s ease-out forwards;
-      animation-delay: 0.3s;
-    }
-
-    .letter::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(120deg, rgba(248, 113, 113, 0.09), transparent 45%),
-        repeating-linear-gradient(
-          to bottom,
-          rgba(248, 113, 113, 0.22),
-          rgba(248, 113, 113, 0.22) 1px,
-          transparent 1px,
-          transparent 11px
-        );
-      mix-blend-mode: multiply;
-      pointer-events: none;
-    }
-
-    .letter-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      position: relative;
-      z-index: 1;
-      color: #4b5563;
-      font-size: 0.85rem;
-    }
-
-    .stamp {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      border: 2px dashed rgba(248, 113, 113, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    .letter-body {
-      position: relative;
-      z-index: 1;
-      margin-top: 6px;
-      color: #374151;
-      font-size: 0.98rem;
-      line-height: 1.6;
-      opacity: 0;
-      transform: translateY(12px);
-      animation: text-reveal 0.9s ease-out forwards;
-      animation-delay: 0.8s;
-    }
-
-    .letter-body p + p {
-      margin-top: 10px;
-    }
-
-    .letter-body .signature {
-      margin-top: 16px;
-      font-weight: 600;
-      color: #111827;
-      font-size: 1.02rem;
-    }
-
-    .overlay-note {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: var(--soft);
-      text-align: center;
-      opacity: 0;
-      animation: fade-in 0.75s ease-out forwards;
-      animation-delay: 1.2s;
-    }
-
-    .close-btn {
-      margin-top: 10px;
-      background: transparent;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      padding: 7px 14px;
-      font-size: 0.8rem;
-      color: var(--soft);
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: background 0.18s ease-out, border-color 0.18s ease-out, transform 0.12s ease-out;
-    }
-
-    .close-btn:hover {
-      background: rgba(15, 23, 42, 0.9);
-      border-color: var(--accent);
-      transform: translateY(-1px);
-      color: #e5e7eb;
-    }
-
-    /* Animations */
-
-    @keyframes float-in {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes letter-pop {
-      0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.9);
-      }
-      60% {
-        opacity: 1;
-        transform: translateY(-8px) scale(1.02);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes text-reveal {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fade-in {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        padding: 14px 12px 18px;
-      }
-      #puzzle {
-        width: min(85vmin, 360px);
-      }
-    }
-  </style>
+    </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="title">
-      <h1>For <span>the love of my life</span> 💌</h1>
-      <p>Put us back together, piece by piece, to unlock a little secret from my heart.</p>
+
+    <header>
+        <h1>Our Timeline</h1>
+        <p class="subtitle">Unlock the memories to reach the present...</p>
+    </header>
+
+    <div class="timeline" id="timeline-container">
+        </div>
+
+    <div id="final-message">
+        <h1>❤️ You made it! ❤️</h1>
+        <p>I hope you enjoyed this trip down memory lane.</p>
+        <p>You are my favorite person in the world. Ready for our next chapter?</p>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div class="status-dot"></div>
-          <span>أنت قلبي</span>
-        </div>
-        <span>Swap two pieces to rearrange</span>
-      </div>
+    <script>
+        // --- CONFIGURATION: EDIT THIS DATA ---
+        const milestones = [
+            {
+                date: "The Beginning",
+                question: "What color shirt was I wearing when we first met?",
+                answer: "blue", 
+                title: "First Meeting",
+                text: "I was so nervous that day(Yes, meri ander se phat rahi thi)! But the moment you smiled, I knew I was in trouble.",
+                image: "met.JPG"
+            },
+            {
+                date: "July 2025",
+                question: "What is the name of the restaurant where I realized that I found the one?",
+                answer: "kuuraku", 
+                title: "The First Date",
+                text: "We had such a good time. It wasn't about the food, it was about being with you.",
+                image: "kuuraku.JPG" 
+            },
+                        {
+                date: "July 2025",
+                question: "What was the date in July when I had my first kiss?",
+                answer: "21", 
+                title: "The First Kiss",
+                text: "That moment under the stars felt like a scene from a movie. I still get butterflies thinking about it.",
+                image: "kiss.JPG" 
+            },
+            {
+                date: "July 2025",
+                question: "The world stopped during our first hug. Do you remember exactly where we were standing?",
+                answer: "metro station", 
+                title: "The First Embrace",
+                text: "The moment my arms went around you, the chaos in my head finally went silent. I was so nervous before, but holding you felt like relief. I realized then that 'home' isn't a place, it's you.",
+                image: "hug.jpeg" 
+            },
+            {
+                date: "July 2025",
+                question: "What was the date in July when I had my first kiss?",
+                answer: "24", 
+                title: "The First Kiss",
+                text: "That moment under the stars felt like a scene from a movie. I still get butterflies thinking about it.",
+                image: "kiss.JPG" 
+            },
+            {
+                date: "August 2025",
+                question: "What color top were you wearing on our 1 month anniversary?",
+                answer: "brown", 
+                title: "The 1 Month Anniversary",
+                text: "Celebrating our first month together felt so special. I couldn't wait for all the months to come.",
+                image: "anniversary.JPG" // Leave empty if no image
+            },
+            {
+                date: "October 2025",
+                question: "What was the date in October when we achieved our first big milestone together?",
+                answer: "19", 
+                title: "The Dream",
+                text: "Building our dreams together has been the most exciting journey. Here's to many more milestones.",
+                image: "dream.JPG" 
+            },
+            {
+                date: "December",
+                question: "We definitely missed half the plot... what movie was playing on the screen during our first make-out session?",
+                answer: "zootopia2", 
+                title: "The Movie Distraction",
+                text: "I honestly couldn't tell you how the movie ended. Sitting there in the dark with you, nothing else mattered. Best movie ticket I ever bought.",
+                image: "movie.jpeg" 
+            },
 
-      <div class="puzzle-wrapper">
-        <div id="puzzle"></div>
-        <div class="puzzle-meta">
-          <!-- label updated -->
-          <span>Pieces: <strong>6 × 6</strong></span>
-          <span id="moves">Moves: <strong>0</strong></span>
-        </div>
-      </div>
-
-      <p class="hint">
-        Tap/click a piece, then another one to <span>swap</span> them.  
-        When the picture is complete, my secret appears. 
-      </p>
-    </div>
-  </div>
-
-  <!-- Letter overlay -->
-  <div class="overlay" id="letterOverlay">
-    <div class="overlay-inner">
-      <div class="overlay-hearts">♡ ♡ ♡</div>
-
-      <div class="letter">
-        <div class="letter-header">
-          <div>
-            <div style="font-weight:600; text-transform:uppercase; letter-spacing:0.12em; font-size:0.72rem;">
-              TO:
-            </div>
-            <div style="margin-top:2px; font-weight:500;">إلى قلبي وروحي “My heart and soul”</div>
-          </div>
-          <div class="stamp">💌</div>
-        </div>
-
-        <div class="letter-body">
-          
-          <p>
-            Dear Bebu,  
-            you just solved this little puzzle, the same way you keep solving life with me, one precious and sweet moment at a time.
-          </p>
-          <p>
-            Every tiny piece of this picture is a reason I’m so grateful for you: your smile, your patience, your chaos, your kindness…your EVERYTHING…
-            all of it fits perfectly with me.
-          </p>
-          <p>
-            No matter how scrambled things get, I always want to end up right next to you, in every picture, every plan, every version of the future. I want to spend the rest of my life with you.
-          </p>
-          <p class="signature">
-            It has always been YOU. It’s YOU or no one ❤️  
-            <span></span>
-          </p>
-        </div>
-      </div>
-
-      <div class="overlay-note">
-        (You can tap outside or press this button if you want to see the puzzle again.)
-      </div>
-
-      <button class="close-btn" id="closeOverlay">Back to the puzzle</button>
-    </div>
-  </div>
-
-  <script>
-    (function () {
-      // more pieces here
-      const rows = 6;
-      const cols = 6;
-      const total = rows * cols;
-      const puzzle = document.getElementById("puzzle");
-      const movesLabel = document.getElementById("moves");
-      const overlay = document.getElementById("letterOverlay");
-      const closeOverlay = document.getElementById("closeOverlay");
-
-      let selectedTile = null;
-      let moves = 0;
-
-      function shuffle(array) {
-        // Fisher-Yates shuffle
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
+            {
+                date: "December",
+                question: "I was super nervous to visit your house, but what gift did I bring for your mom?",
+                answer: "Flowers",
+                title: "Meeting the Family",
+                text: "Walking into your home felt like such a huge step. I just wanted to make a good impression because I know how much they mean to you.",
+                image: "house.jpeg"
+            },
+            {
+                date: "December",
+                question: "We got brave in December! At which Metro station did we share our first public kiss?",
+                answer: "chhatarpur", 
+                title: "Metro Romance",
+                text: "People might have been watching, but in that moment, the whole world blurred out. It was just us.",
+                image: "metro.jpeg"
         }
-        return array;
-      }
+        ];
 
-      function createPuzzle() {
-        const indices = Array.from({ length: total }, (_, i) => i);
-        let shuffled = shuffle(indices.slice());
+        // --- GAME LOGIC ---
+        let currentLevel = 0;
 
-        // Ensure it's not already solved (rare but possible)
-        while (shuffled.every((val, idx) => val === idx)) {
-          shuffled = shuffle(indices.slice());
-        }
+        function initTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
 
-        puzzle.innerHTML = "";
-        moves = 0;
-        updateMoves();
+            milestones.forEach((item, index) => {
+                // Create HTML structure
+                const div = document.createElement('div');
+                div.className = `milestone ${index === 0 ? 'active' : ''}`;
+                div.id = `milestone-${index}`;
 
-        shuffled.forEach((index) => {
-          const tile = document.createElement("div");
-          tile.className = "tile";
-          tile.dataset.index = index;
+                div.innerHTML = `
+                    <div class="dot"></div>
+                    <div class="content">
+                        <span class="date">${item.date}</span>
+                        <h3>🔒 Locked Memory</h3>
+                        
+                        <div class="quiz-section" id="quiz-${index}">
+                            <p>${item.question}</p>
+                            <input type="text" id="input-${index}" placeholder="Answer...">
+                            <button onclick="checkAnswer(${index})">Unlock</button>
+                            <div class="error-msg" id="error-${index}">Try again! Hint: It's one word usually.</div>
+                        </div>
 
-          const row = Math.floor(index / cols);
-          const col = index % cols;
-          const x = (col / (cols - 1)) * 100;
-          const y = (row / (rows - 1)) * 100;
-          tile.style.backgroundPosition = `${x}% ${y}%`;
-
-          tile.addEventListener("click", () => handleTileClick(tile));
-          puzzle.appendChild(tile);
-        });
-      }
-
-      function handleTileClick(tile) {
-        if (!selectedTile) {
-          selectedTile = tile;
-          tile.classList.add("selected");
-          return;
+                        <div class="hidden-memory" id="memory-${index}">
+                            <h3>${item.title}</h3>
+                            <p>${item.text}</p>
+                            ${item.image ? `<img src="${item.image}" class="memory-image">` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        if (tile === selectedTile) {
-          // Unselect if same tile clicked again
-          tile.classList.remove("selected");
-          selectedTile = null;
-          return;
+        function checkAnswer(index) {
+            const input = document.getElementById(`input-${index}`);
+            const error = document.getElementById(`error-${index}`);
+            const userAnswer = input.value.toLowerCase().trim();
+            const correctAnswer = milestones[index].answer.toLowerCase().trim();
+
+            if (userAnswer === correctAnswer) {
+                // SUCCESS
+                unlockMilestone(index);
+            } else {
+                // FAILURE
+                error.style.display = 'block';
+                input.style.border = '1px solid red';
+            }
         }
 
-        // Swap the two tiles in the DOM
-        swapTiles(selectedTile, tile);
-        selectedTile.classList.remove("selected");
-        selectedTile = null;
+        function unlockMilestone(index) {
+            const milestoneDiv = document.getElementById(`milestone-${index}`);
+            const quizDiv = document.getElementById(`quiz-${index}`);
+            const memoryDiv = document.getElementById(`memory-${index}`);
+            const titleH3 = milestoneDiv.querySelector('.content h3');
 
-        moves += 1;
-        updateMoves();
-        checkSolved();
-      }
+            // 1. Visual updates
+            milestoneDiv.classList.remove('active');
+            milestoneDiv.classList.add('unlocked');
+            
+            // 2. Hide quiz, show memory
+            quizDiv.style.display = 'none';
+            memoryDiv.style.display = 'block';
+            titleH3.style.display = 'none'; // Hide "Locked Memory" text
 
-      function swapTiles(tileA, tileB) {
-        const parent = tileA.parentNode;
-        const temp = document.createElement("div");
-
-        parent.insertBefore(temp, tileA);
-        parent.insertBefore(tileA, tileB);
-        parent.insertBefore(tileB, temp);
-        parent.removeChild(temp);
-      }
-
-      function updateMoves() {
-        movesLabel.innerHTML = `Moves: <strong>${moves}</strong>`;
-      }
-
-      function checkSolved() {
-        const tiles = Array.from(puzzle.children);
-        const solved = tiles.every((tile, position) => {
-          return Number(tile.dataset.index) === position;
-        });
-
-        if (solved) {
-          setTimeout(showLetter, 400); // little delay for satisfaction
+            // 3. Prepare next level
+            currentLevel++;
+            if (currentLevel < milestones.length) {
+                const nextMilestone = document.getElementById(`milestone-${currentLevel}`);
+                nextMilestone.classList.add('active');
+                
+                // Auto scroll to next
+                nextMilestone.scrollIntoView({behavior: "smooth", block: "center"});
+            } else {
+                // FINISHED ALL
+                document.getElementById('final-message').style.display = 'block';
+                document.getElementById('final-message').scrollIntoView({behavior: "smooth"});
+            }
         }
-      }
 
-      function showLetter() {
-        overlay.classList.add("show");
-      }
-
-      function hideLetter() {
-        overlay.classList.remove("show");
-      }
-
-      // Clicking outside inner letter also closes
-      overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) {
-          hideLetter();
-        }
-      });
-
-      closeOverlay.addEventListener("click", hideLetter);
-
-      // Init
-      createPuzzle();
-    })();
-  </script>
+        // Start the game
+        initTimeline();
+    </script>
 </body>
 </html>
