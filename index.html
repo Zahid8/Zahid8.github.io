@@ -1,364 +1,438 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Story</title>
-    <style>
-        /* --- 1. VISUAL SETUP --- */
-        :root {
-            --primary: #ff6b6b; /* Soft Red */
-            --secondary: #4ecdc4; /* Teal */
-            --bg: #f7f9fc;
-            --text: #2d3436;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Bebu 💘 Will you be my Valentine?</title>
+  <style>
+    :root{
+      --bg1:#fff0f6;
+      --bg2:#ffe8f0;
+      --card:#ffffffcc;
+      --text:#2b1b2b;
+      --yes:#ff4d88;
+      --yes2:#ff7aa8;
+      --no:#7b7b7b;
+      --shadow: 0 18px 60px rgba(0,0,0,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100svh;
+      font-family: ui-rounded, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Helvetica, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 900px at 20% 10%, var(--bg2), transparent 60%),
+                  radial-gradient(900px 900px at 90% 40%, #ffe3ee, transparent 55%),
+                  linear-gradient(135deg, var(--bg1), #fff);
+      overflow:hidden;
+    }
 
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .wrap{
+      position:relative;
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding: clamp(18px, 4vw, 36px);
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+    .card{
+      width:min(560px, 92vw);
+      padding: clamp(18px, 4vw, 34px);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
 
-        h1 { color: var(--primary); margin-bottom: 10px; }
-        p.subtitle { color: #888; font-style: italic; }
+    .badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:10px 14px;
+      border-radius:999px;
+      background: rgba(255,77,136,.10);
+      border:1px solid rgba(255,77,136,.18);
+      font-weight:700;
+    }
 
-        /* --- 2. TIMELINE STYLES --- */
-        .timeline {
-            position: relative;
-            max-width: 600px;
-            width: 100%;
-            padding: 20px 0;
-        }
+    h1{
+      margin:14px 0 8px;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height:1.05;
+      letter-spacing:-0.02em;
+    }
+    .sub{
+      margin: 0 0 18px;
+      font-size: clamp(14px, 2.6vw, 18px);
+      opacity:.85;
+    }
 
-        /* The vertical line */
-        .timeline::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 20px; /* Adjust for mobile alignment */
-            width: 4px;
-            background: #ddd;
-            border-radius: 2px;
-        }
+    .stage{
+      position:relative;
+      height: 240px;
+      margin-top: 12px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.25));
+      border: 1px dashed rgba(255,77,136,.22);
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+    }
 
-        /* The individual memory card container */
-        .milestone {
-            position: relative;
-            margin-bottom: 50px;
-            padding-left: 60px; /* Space for the dot */
-            opacity: 0.5; /* Dimmed by default (locked) */
-            transition: all 0.5s ease;
-            filter: blur(4px); /* Blurred by default */
-            pointer-events: none; /* Not clickable when locked */
-        }
+    .btn{
+      border:0;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+      transition: transform .12s ease, filter .12s ease;
+      touch-action: manipulation;
+    }
+    .btn:active{ transform: scale(.97); filter: brightness(.98); }
 
-        /* The "Active" (Current Challenge) State */
-        .milestone.active {
-            opacity: 1;
-            filter: blur(0);
-            pointer-events: auto;
-            transform: scale(1.02);
-        }
+    #yesBtn{
+      background: linear-gradient(135deg, var(--yes), var(--yes2));
+      color:white;
+      position:relative;
+      z-index:2;
+    }
+    #noBtn{
+      background: rgba(123,123,123,.12);
+      color: #3e3e3e;
+      border: 1px solid rgba(123,123,123,.25);
+      position:absolute;
+      left: 60%;
+      top: 58%;
+      transform: translate(-50%,-50%);
+      z-index:3;
+    }
 
-        /* The "Unlocked" (Completed) State */
-        .milestone.unlocked {
-            opacity: 1;
-            filter: blur(0);
-            pointer-events: auto;
-        }
+    .row{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+    }
 
-        /* The Dot on the line */
-        .dot {
-            position: absolute;
-            left: 11px; /* Center on the line */
-            top: 0;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #bbb;
-            border: 4px solid var(--bg);
-            z-index: 2;
-            transition: background 0.3s;
-        }
+    .hint{
+      margin: 14px 0 0;
+      font-size: 14px;
+      opacity:.75;
+    }
 
-        .milestone.unlocked .dot, .milestone.active .dot {
-            background: var(--primary);
-        }
+    .footer{
+      margin-top:18px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 12px;
+      opacity:.65;
+    }
 
-        /* The Content Card */
-        .content {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+    /* LOVE SCREEN */
+    .love{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      padding: 28px;
+      background:
+        radial-gradient(900px 700px at 20% 10%, #ffe0ea, transparent 60%),
+        radial-gradient(900px 700px at 90% 60%, #ffd1e2, transparent 55%),
+        linear-gradient(135deg, #fff0f6, #fff);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .35s ease;
+    }
+    .love.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .loveCard{
+      width:min(640px, 92vw);
+      border-radius: 30px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: clamp(20px, 4vw, 40px);
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .love h2{
+      margin:0 0 8px;
+      font-size: clamp(28px, 5.2vw, 46px);
+      letter-spacing:-0.02em;
+    }
+    .msg{
+      font-size: clamp(16px, 2.8vw, 20px);
+      line-height:1.5;
+      opacity:.92;
+      margin: 12px auto 18px;
+      max-width: 52ch;
+    }
+    .pill{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 14px;
+      border-radius:999px;
+      background: rgba(255,77,136,.12);
+      border: 1px solid rgba(255,77,136,.20);
+      font-weight:800;
+    }
+    .small{
+      font-size:12px;
+      opacity:.65;
+      margin-top: 10px;
+    }
 
-        .date {
-            font-size: 0.85em;
-            color: var(--primary);
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            display: block;
-        }
+    /* floating hearts */
+    .heart{
+      position:fixed;
+      font-size: 18px;
+      pointer-events:none;
+      animation: floatUp 1.9s ease-in forwards;
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,.12));
+    }
+    @keyframes floatUp{
+      from{ transform: translateY(0) scale(1); opacity:1;}
+      to{ transform: translateY(-160px) scale(1.8); opacity:0;}
+    }
 
-        .hidden-memory {
-            display: none; /* Hidden until unlocked */
-            margin-top: 15px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            color: #555;
-            line-height: 1.6;
-        }
-        
-        .memory-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        /* --- 3. THE QUIZ UI --- */
-        .quiz-section {
-            background: #fff0f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 1px dashed var(--primary);
-        }
-
-        input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 60%;
-        }
-
-        button {
-            padding: 8px 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .error-msg {
-            color: red;
-            font-size: 0.8em;
-            display: none;
-            margin-top: 5px;
-        }
-
-        /* --- 4. FINAL REVEAL --- */
-        #final-message {
-            display: none;
-            text-align: center;
-            margin-top: 50px;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.2);
-            animation: popIn 1s ease;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-    </style>
+    /* little sparkles */
+    .spark{
+      position:absolute;
+      width:10px;height:10px;
+      border-radius:50%;
+      background: rgba(255,77,136,.35);
+      animation: pop .7s ease-out forwards;
+    }
+    @keyframes pop{
+      from{ transform: scale(.3); opacity:1;}
+      to{ transform: scale(2.8); opacity:0;}
+    }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="badge">💘 For my Bebu <span aria-hidden="true">✨</span></div>
+      <h1>Will you be my Valentine?</h1>
+      <p class="sub">Choose wisely… (the universe is watching 👀)</p>
 
-    <header>
-        <h1>Our Timeline</h1>
-        <p class="subtitle">Unlock the memories to reach the present...</p>
-    </header>
-
-    <div class="timeline" id="timeline-container">
+      <div class="stage" id="stage">
+        <div class="row">
+          <button class="btn" id="yesBtn">Yes 😍</button>
         </div>
+        <button class="btn" id="noBtn" aria-label="No">No 🙃</button>
+      </div>
 
-<div id="final-message">
-        <h1>To My Beautiful Wife ❤️</h1>
-        <p>Walking down memory lane makes me realize one thing: every moment, big or small, was leading me straight to you.</p>
-        <p>You are not just my love, you are my peace, my home, and my absolute everything. Calling you my wife is the greatest honor of my life.</p>
-        <p class="subtitle">I love you, endlessly.</p>
+      <p class="hint" id="hint">Tip: “No” is… kinda shy today.</p>
+
+      <div class="footer">
+        <span>made with 💗 by you</span>
+        <span id="attempts">No attempts: 0</span>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // --- CONFIGURATION: EDIT THIS DATA ---
-        const milestones = [
-            {
-                date: "The Beginning",
-                question: "What color shirt was I wearing when we first met?",
-                answer: "blue", 
-                title: "First Meeting",
-                text: "I was so nervous that day(Yes, meri ander se phat rahi thi)! But the moment you smiled, I knew I was in trouble.",
-                image: "met.JPG"
-            },
-            {
-                date: "July 2025",
-                question: "What is the name of the restaurant where I realized that I found the one?",
-                answer: "kuuraku", 
-                title: "The First Date",
-                text: "We had such a good time. It wasn't about the food, it was about being with you.",
-                image: "kuuraku.JPG" 
-            },
-            {
-                date: "July 2025",
-                question: "The world stopped during our first hug. Do you remember exactly where we were standing?",
-                answer: "metro station", 
-                title: "The First Embrace",
-                text: "The moment my arms went around you, the chaos in my head finally went silent. I was so nervous before, but holding you felt like relief. I realized then that 'home' isn't a place, it's you.",
-                image: "hug.jpeg" 
-            },
-            {
-                date: "July 2025",
-                question: "What was the date in July when I had my first kiss?",
-                answer: "24", 
-                title: "The First Kiss",
-                text: "The world didn't just stop; it disappeared. I remember being so nervous before, but the moment you kissed me, everything went quiet. It was the exact second I realized I was in deep trouble, because I knew I never wanted to be with anyone else.",
-                image: "kiss.JPG" 
-            },
-            {
-                date: "August 2025",
-                question: "What color top were you wearing on our 1 month anniversary?",
-                answer: "brown", 
-                title: "The 1 Month Anniversary",
-                text: "We were only 30 days in, but looking at you that day, I didn't just see a girlfriend, I saw my future. It sounds crazy to say I knew so early, but I did. One month down, a lifetime to go.",
-                image: "anniversary.JPG" // Leave empty if no image
-            },
-            {
-                date: "October 2025",
-                question: "What was the date in October when we achieved our first big milestone together?",
-                answer: "19", 
-                title: "The Dream",
-                text: "Watching you graduate from your 500 hour yoga course was one of the proudest moments of my life. I saw the late nights and the dedication you put in. Being able to support you and help you chase this dream was my privilege. Your wins are my wins, always.",
-                image: "dream.JPG" 
-            },
-            {
-                date: "December",
-                question: "We definitely missed half the plot... what movie was playing on the screen during our first make-out session?",
-                answer: "zootopia2", 
-                title: "The Movie Distraction",
-                text: "I honestly couldn't tell you how the movie ended. Sitting there in the dark with you, nothing else mattered. Best movie ticket I ever bought.",
-                image: "movie.jpeg" 
-            },
+  <div class="love" id="love">
+    <div class="loveCard">
+      <div class="pill">✅ Accepted! <span aria-hidden="true">💞</span></div>
+      <h2>Yayyy, Bebu! 🥹💘</h2>
+      <p class="msg" id="loveMsg">
+You make my ordinary days feel magical, my quiet moments feel full, and my heart feel truly at home.
+Choosing you is the easiest, happiest decision of my life, today, tomorrow, and always.
+Happy Valentine’s Day, my Bebu. 💗
+      </p>
+      <button class="btn" id="restart" style="background:rgba(0,0,0,.06); color:#2b1b2b; border:1px solid rgba(0,0,0,.08); box-shadow:none;">
+        Replay (for extra kisses) 😘
+      </button>
+      <div class="small">P.S. you’re stuck with me now 😌</div>
+    </div>
+  </div>
 
-            {
-                date: "December",
-                question: "I was super nervous to visit your house, but what gift did I bring for your mom?",
-                answer: "Flowers",
-                title: "Meeting the Family",
-                text: "Walking into your home felt like such a huge step. I just wanted to make a good impression because I know how much they mean to you.",
-                image: "house.jpeg"
-            },
-            {
-                date: "December",
-                question: "We got brave in December! At which Metro station did we share our first public kiss?",
-                answer: "chhatarpur", 
-                title: "Metro Romance",
-                text: "People might have been watching, but in that moment, the whole world blurred out. It was just us.",
-                image: "metro.jpeg"
-        }
-        ];
+<script>
+(() => {
+  const stage = document.getElementById("stage");
+  const noBtn  = document.getElementById("noBtn");
+  const yesBtn = document.getElementById("yesBtn");
+  const hint   = document.getElementById("hint");
+  const attemptsEl = document.getElementById("attempts");
+  const love = document.getElementById("love");
+  const restart = document.getElementById("restart");
 
-        // --- GAME LOGIC ---
-        let currentLevel = 0;
+  let noAttempts = 0;
 
-        function initTimeline() {
-            const container = document.getElementById('timeline-container');
-            container.innerHTML = '';
+  // Place "No" somewhere within the stage bounds
+  function moveNoButton(awayFromX = null, awayFromY = null) {
+    const rect = stage.getBoundingClientRect();
+    const b = noBtn.getBoundingClientRect();
 
-            milestones.forEach((item, index) => {
-                // Create HTML structure
-                const div = document.createElement('div');
-                div.className = `milestone ${index === 0 ? 'active' : ''}`;
-                div.id = `milestone-${index}`;
+    const padding = 12;
+    const maxX = rect.width  - b.width  - padding;
+    const maxY = rect.height - b.height - padding;
 
-                div.innerHTML = `
-                    <div class="dot"></div>
-                    <div class="content">
-                        <span class="date">${item.date}</span>
-                        <h3>🔒 Locked Memory</h3>
-                        
-                        <div class="quiz-section" id="quiz-${index}">
-                            <p>${item.question}</p>
-                            <input type="text" id="input-${index}" placeholder="Answer...">
-                            <button onclick="checkAnswer(${index})">Unlock</button>
-                            <div class="error-msg" id="error-${index}">Try again! Hint: It's one word usually.</div>
-                        </div>
+    let x = Math.random() * maxX + padding;
+    let y = Math.random() * maxY + padding;
 
-                        <div class="hidden-memory" id="memory-${index}">
-                            <h3>${item.title}</h3>
-                            <p>${item.text}</p>
-                            ${item.image ? `<img src="${item.image}" class="memory-image">` : ''}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
+    // If we have a pointer position, bias away from it
+    if (awayFromX !== null && awayFromY !== null) {
+      const localX = awayFromX - rect.left;
+      const localY = awayFromY - rect.top;
 
-        function checkAnswer(index) {
-            const input = document.getElementById(`input-${index}`);
-            const error = document.getElementById(`error-${index}`);
-            const userAnswer = input.value.toLowerCase().trim();
-            const correctAnswer = milestones[index].answer.toLowerCase().trim();
+      const dx = (x - localX);
+      const dy = (y - localY);
 
-            if (userAnswer === correctAnswer) {
-                // SUCCESS
-                unlockMilestone(index);
-            } else {
-                // FAILURE
-                error.style.display = 'block';
-                input.style.border = '1px solid red';
-            }
-        }
+      // If accidentally close, push to opposite side
+      if (Math.hypot(dx, dy) < 120) {
+        x = (localX < rect.width / 2) ? (rect.width - b.width - padding) : padding;
+        y = (localY < rect.height / 2) ? (rect.height - b.height - padding) : padding;
+      }
+    }
 
-        function unlockMilestone(index) {
-            const milestoneDiv = document.getElementById(`milestone-${index}`);
-            const quizDiv = document.getElementById(`quiz-${index}`);
-            const memoryDiv = document.getElementById(`memory-${index}`);
-            const titleH3 = milestoneDiv.querySelector('.content h3');
+    noBtn.style.left = x + "px";
+    noBtn.style.top  = y + "px";
+    noBtn.style.transform = "translate(0,0)";
+  }
 
-            // 1. Visual updates
-            milestoneDiv.classList.remove('active');
-            milestoneDiv.classList.add('unlocked');
-            
-            // 2. Hide quiz, show memory
-            quizDiv.style.display = 'none';
-            memoryDiv.style.display = 'block';
-            titleH3.style.display = 'none'; // Hide "Locked Memory" text
+  // Cute escalating messages
+const lines = [
+  "Tip: No is… kinda shy today 🫣",
+  "Hehe nice try 😌",
+  "Bebu… be serious now 😭",
+  "Your finger is intimidating 👁️👄👁️",
+  "Nope. That answer has been rejected 💌",
+  "Plot twist: the No button is nervous 🫠",
+  "Why would you even look at No 😤",
+  "Bebu pls… my heart is fragile 🥺",
+  "The universe says try again 🌌",
+  "No is currently unavailable ❌",
+  "This button only believes in love 💖",
+  "Thats illegal in Valentine law 🚨💘",
+  "Hmm… suspicious behavior detected 🤨",
+  "I see what you are doing… and I dont like it 😌",
+  "The No button has anxiety 😭",
+  "Bebu stop teasing meee 🥹",
+  "Emotionally, this is not okay 😤",
+  "At this point you are just flirting 😏",
+  "No is running away from commitment 🏃‍♀️💨",
+  "This is a Yes only household 🏠💞",
+  "Even the button ships us 💗",
+  "Okay wow, you are really enjoying this 😭",
+  "The No button is crying now 😢",
+  "Please press Yes and save everyone 😩",
+  "Bebu… my heart cant take this 🥺",
+  "The button believes you love me 😌",
+  "Be honest, you want to press Yes 😘",
+  "Last warning before kisses are deployed 💋",
+  "Alright fine… just say Yes already 💘"
+];
 
-            // 3. Prepare next level
-            currentLevel++;
-            if (currentLevel < milestones.length) {
-                const nextMilestone = document.getElementById(`milestone-${currentLevel}`);
-                nextMilestone.classList.add('active');
-                
-                // Auto scroll to next
-                nextMilestone.scrollIntoView({behavior: "smooth", block: "center"});
-            } else {
-                // FINISHED ALL
-                document.getElementById('final-message').style.display = 'block';
-                document.getElementById('final-message').scrollIntoView({behavior: "smooth"});
-            }
-        }
 
-        // Start the game
-        initTimeline();
-    </script>
+  function updateHint() {
+    hint.textContent = lines[Math.min(noAttempts, lines.length - 1)];
+    attemptsEl.textContent = `No attempts: ${noAttempts}`;
+  }
+
+  function sparkle(x, y) {
+    const s = document.createElement("div");
+    s.className = "spark";
+    s.style.left = (x - 5) + "px";
+    s.style.top  = (y - 5) + "px";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  }
+
+  function heartBurst(count = 10) {
+    const rect = stage.getBoundingClientRect();
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.textContent = ["💗","💖","💞","💕","💘"][Math.floor(Math.random()*5)];
+      h.style.left = (rect.left + rect.width/2 + (Math.random()*120 - 60)) + "px";
+      h.style.top  = (rect.top + rect.height/2 + (Math.random()*60 - 30)) + "px";
+      h.style.fontSize = (16 + Math.random()*14) + "px";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 2000);
+    }
+  }
+
+  // Make "No" dodge proximity on touch/mouse move inside stage
+  function onMove(ev) {
+    const e = ev.touches ? ev.touches[0] : ev;
+    const bx = noBtn.getBoundingClientRect();
+    const dist = Math.hypot((bx.left + bx.width/2) - e.clientX, (bx.top + bx.height/2) - e.clientY);
+
+    if (dist < 110) {
+      noAttempts++;
+      updateHint();
+      moveNoButton(e.clientX, e.clientY);
+      sparkle(e.clientX, e.clientY);
+
+      // make it extra silly after a few attempts
+      if (noAttempts === 3) noBtn.textContent = "No 😳";
+      if (noAttempts === 5) noBtn.textContent = "Still no?? 🥲";
+      if (noAttempts === 7) noBtn.textContent = "I’m RUNNING 🏃‍♀️💨";
+    }
+  }
+
+  // If she somehow taps the No button (rare), it still escapes
+  noBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    noAttempts++;
+    updateHint();
+    moveNoButton(e.clientX, e.clientY);
+    sparkle(e.clientX, e.clientY);
+  });
+
+  stage.addEventListener("mousemove", onMove, { passive: true });
+  stage.addEventListener("touchmove", onMove, { passive: true });
+
+  yesBtn.addEventListener("click", () => {
+    heartBurst(18);
+    love.classList.add("show");
+    // a few more hearts for drama
+    let t = 0;
+    const timer = setInterval(() => {
+      heartBurst(6);
+      t++;
+      if (t > 3) clearInterval(timer);
+    }, 260);
+  });
+
+  restart.addEventListener("click", () => {
+    love.classList.remove("show");
+    noAttempts = 0;
+    noBtn.textContent = "No 🙃";
+    updateHint();
+    moveNoButton();
+  });
+
+  // initial placement
+  updateHint();
+  moveNoButton();
+
+  // iOS double-tap zoom prevention for buttons
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (!document._lastTouchEnd) document._lastTouchEnd = now;
+    const delta = now - document._lastTouchEnd;
+    if (delta < 300) e.preventDefault();
+    document._lastTouchEnd = now;
+  }, { passive: false });
+})();
+</script>
 </body>
 </html>
