@@ -1,438 +1,487 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Bebu 💘 Will you be my Valentine?</title>
-  <style>
-    :root{
-      --bg1:#fff0f6;
-      --bg2:#ffe8f0;
-      --card:#ffffffcc;
-      --text:#2b1b2b;
-      --yes:#ff4d88;
-      --yes2:#ff7aa8;
-      --no:#7b7b7b;
-      --shadow: 0 18px 60px rgba(0,0,0,.12);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100svh;
-      font-family: ui-rounded, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Helvetica, Arial, sans-serif;
-      color:var(--text);
-      background: radial-gradient(1200px 900px at 20% 10%, var(--bg2), transparent 60%),
-                  radial-gradient(900px 900px at 90% 40%, #ffe3ee, transparent 55%),
-                  linear-gradient(135deg, var(--bg1), #fff);
-      overflow:hidden;
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>For Her 💘</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100dvh;
+            /* Use dynamic viewport height for mobile browsers */
+            display: grid;
+            place-items: center;
+            background: #0b1220;
+            font-family: system-ui, Segoe UI, Roboto, Arial;
+            overflow: hidden;
+            /* Prevent scrolling */
+            touch-action: none;
+            /* Disable default touch actions like scroll/zoom */
+        }
 
-    .wrap{
-      position:relative;
-      min-height:100svh;
-      display:grid;
-      place-items:center;
-      padding: clamp(18px, 4vw, 36px);
-    }
+        canvas {
+            width: min(100vw, 420px);
+            /* Fill width on mobile */
+            height: auto;
+            max-height: 100dvh;
+            border-radius: 14px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, .35);
+            background: linear-gradient(#8dd7ff, #35b9ff);
+            touch-action: none;
+        }
 
-    .card{
-      width:min(560px, 92vw);
-      padding: clamp(18px, 4vw, 34px);
-      background: var(--card);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.6);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .badge{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:10px 14px;
-      border-radius:999px;
-      background: rgba(255,77,136,.10);
-      border:1px solid rgba(255,77,136,.18);
-      font-weight:700;
-    }
-
-    h1{
-      margin:14px 0 8px;
-      font-size: clamp(28px, 5vw, 44px);
-      line-height:1.05;
-      letter-spacing:-0.02em;
-    }
-    .sub{
-      margin: 0 0 18px;
-      font-size: clamp(14px, 2.6vw, 18px);
-      opacity:.85;
-    }
-
-    .stage{
-      position:relative;
-      height: 240px;
-      margin-top: 12px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.25));
-      border: 1px dashed rgba(255,77,136,.22);
-      overflow:hidden;
-      display:grid;
-      place-items:center;
-    }
-
-    .btn{
-      border:0;
-      padding: 14px 18px;
-      border-radius: 16px;
-      font-size: 18px;
-      font-weight: 800;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      box-shadow: 0 10px 25px rgba(0,0,0,.12);
-      transition: transform .12s ease, filter .12s ease;
-      touch-action: manipulation;
-    }
-    .btn:active{ transform: scale(.97); filter: brightness(.98); }
-
-    #yesBtn{
-      background: linear-gradient(135deg, var(--yes), var(--yes2));
-      color:white;
-      position:relative;
-      z-index:2;
-    }
-    #noBtn{
-      background: rgba(123,123,123,.12);
-      color: #3e3e3e;
-      border: 1px solid rgba(123,123,123,.25);
-      position:absolute;
-      left: 60%;
-      top: 58%;
-      transform: translate(-50%,-50%);
-      z-index:3;
-    }
-
-    .row{
-      display:flex;
-      gap:14px;
-      justify-content:center;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .hint{
-      margin: 14px 0 0;
-      font-size: 14px;
-      opacity:.75;
-    }
-
-    .footer{
-      margin-top:18px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size: 12px;
-      opacity:.65;
-    }
-
-    /* LOVE SCREEN */
-    .love{
-      position:fixed;
-      inset:0;
-      display:grid;
-      place-items:center;
-      padding: 28px;
-      background:
-        radial-gradient(900px 700px at 20% 10%, #ffe0ea, transparent 60%),
-        radial-gradient(900px 700px at 90% 60%, #ffd1e2, transparent 55%),
-        linear-gradient(135deg, #fff0f6, #fff);
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .35s ease;
-    }
-    .love.show{
-      opacity:1;
-      pointer-events:auto;
-    }
-    .loveCard{
-      width:min(640px, 92vw);
-      border-radius: 30px;
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(255,255,255,.7);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      padding: clamp(20px, 4vw, 40px);
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .love h2{
-      margin:0 0 8px;
-      font-size: clamp(28px, 5.2vw, 46px);
-      letter-spacing:-0.02em;
-    }
-    .msg{
-      font-size: clamp(16px, 2.8vw, 20px);
-      line-height:1.5;
-      opacity:.92;
-      margin: 12px auto 18px;
-      max-width: 52ch;
-    }
-    .pill{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px 14px;
-      border-radius:999px;
-      background: rgba(255,77,136,.12);
-      border: 1px solid rgba(255,77,136,.20);
-      font-weight:800;
-    }
-    .small{
-      font-size:12px;
-      opacity:.65;
-      margin-top: 10px;
-    }
-
-    /* floating hearts */
-    .heart{
-      position:fixed;
-      font-size: 18px;
-      pointer-events:none;
-      animation: floatUp 1.9s ease-in forwards;
-      filter: drop-shadow(0 10px 12px rgba(0,0,0,.12));
-    }
-    @keyframes floatUp{
-      from{ transform: translateY(0) scale(1); opacity:1;}
-      to{ transform: translateY(-160px) scale(1.8); opacity:0;}
-    }
-
-    /* little sparkles */
-    .spark{
-      position:absolute;
-      width:10px;height:10px;
-      border-radius:50%;
-      background: rgba(255,77,136,.35);
-      animation: pop .7s ease-out forwards;
-    }
-    @keyframes pop{
-      from{ transform: scale(.3); opacity:1;}
-      to{ transform: scale(2.8); opacity:0;}
-    }
-  </style>
+        .hint {
+            color: #cbd5e1;
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+            opacity: .9;
+            pointer-events: none;
+            /* Let clicks pass through to canvas if needed */
+        }
+    </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" id="card">
-      <div class="badge">💘 For my Bebu <span aria-hidden="true">✨</span></div>
-      <h1>Will you be my Valentine?</h1>
-      <p class="sub">Choose wisely… (the universe is watching 👀)</p>
-
-      <div class="stage" id="stage">
-        <div class="row">
-          <button class="btn" id="yesBtn">Yes 😍</button>
-        </div>
-        <button class="btn" id="noBtn" aria-label="No">No 🙃</button>
-      </div>
-
-      <p class="hint" id="hint">Tip: “No” is… kinda shy today.</p>
-
-      <div class="footer">
-        <span>made with 💗 by you</span>
-        <span id="attempts">No attempts: 0</span>
-      </div>
+    <div>
+        <canvas id="c" width="360" height="640"></canvas>
+        <div class="hint">Tap / Click / Space to flap · R to restart</div>
     </div>
-  </div>
 
-  <div class="love" id="love">
-    <div class="loveCard">
-      <div class="pill">✅ Accepted! <span aria-hidden="true">💞</span></div>
-      <h2>Yayyy, Bebu! 🥹💘</h2>
-      <p class="msg" id="loveMsg">
-You make my ordinary days feel magical, my quiet moments feel full, and my heart feel truly at home.
-Choosing you is the easiest, happiest decision of my life, today, tomorrow, and always.
-Happy Valentine’s Day, my Bebu. 💗
-      </p>
-      <button class="btn" id="restart" style="background:rgba(0,0,0,.06); color:#2b1b2b; border:1px solid rgba(0,0,0,.08); box-shadow:none;">
-        Replay (for extra kisses) 😘
-      </button>
-      <div class="small">P.S. you’re stuck with me now 😌</div>
-    </div>
-  </div>
+    <script>
+        (() => {
+            const canvas = document.getElementById("c");
+            const ctx = canvas.getContext("2d");
+            const W = canvas.width, H = canvas.height;
 
-<script>
-(() => {
-  const stage = document.getElementById("stage");
-  const noBtn  = document.getElementById("noBtn");
-  const yesBtn = document.getElementById("yesBtn");
-  const hint   = document.getElementById("hint");
-  const attemptsEl = document.getElementById("attempts");
-  const love = document.getElementById("love");
-  const restart = document.getElementById("restart");
+            // ====== YOU CUSTOMIZE THESE ======
+            const YOUR_IMAGE = "me.png";
+            const HER_IMAGE = "her.png"; // change to "her.png" if needed
 
-  let noAttempts = 0;
+            // Place heart on her chest area (tweak these if needed)
+            const HEART_OFFSET_X = 10;   // +right / -left relative to her image center
+            const HEART_OFFSET_Y = 30;   // +down / -up relative to her image top
 
-  // Place "No" somewhere within the stage bounds
-  function moveNoButton(awayFromX = null, awayFromY = null) {
-    const rect = stage.getBoundingClientRect();
-    const b = noBtn.getBoundingClientRect();
+            // Romantic message (edit freely)
+            const MESSAGE_TITLE = "For Bebu 💖";
+            // Updated to be a single string for auto-wrapping
+            const MESSAGE_TEXT = "Baby honestly mujhe samajh nahi aata mei kaise explain karu, but you have become such an important part of my life. Aur jab mei aapko nahi dekhta then har cheez kharab si lagne lag jati hai. Mood off ho jata hai, din incomplete sa feel hota hai. Aur jab mei aapko nahi dekhta, it feels like something is missing. Like my day is not even proper without you. Your laugh, seriously it makes everything better. Jab aap hasti ho na, mujhe lagta hai sab theek hai. Mei aapki itni care karta hu ki agar aap upset hoti ho, toh mujhe bhi chain nahi milta. Aur jab aap khana nahi khati, to I feel ki mei khud apne haath se khila sakta aapko. Aap meri motivation ban gayi ho. My reason to keep going, to keep living, to keep trying. Aapki presence mere dil ko pura light up kar deti hai. So, bebu, I ask you this, I have fallen so hard for you, so hard it hurts, so hard I cannot think straight, so hard that I can only, think about you, but I would like to know, if I have your permission, to fall even harder, even deeper in love with you?";
 
-    const padding = 12;
-    const maxX = rect.width  - b.width  - padding;
-    const maxY = rect.height - b.height - padding;
+            // =================================
 
-    let x = Math.random() * maxX + padding;
-    let y = Math.random() * maxY + padding;
+            // Simple physics/settings
+            const GRAVITY = 0.38;
+            const FLAP = -7.0;
+            const SPEED = 2.4;
 
-    // If we have a pointer position, bias away from it
-    if (awayFromX !== null && awayFromY !== null) {
-      const localX = awayFromX - rect.left;
-      const localY = awayFromY - rect.top;
+            const PIPE_W = 58;
+            const GAP = 160;
+            const FLOOR_H = 70;
 
-      const dx = (x - localX);
-      const dy = (y - localY);
+            // Make it short: after 3-4 obstacles, show her
+            const PIPES_BEFORE_HER = 10; // set 3 or 4
 
-      // If accidentally close, push to opposite side
-      if (Math.hypot(dx, dy) < 120) {
-        x = (localX < rect.width / 2) ? (rect.width - b.width - padding) : padding;
-        y = (localY < rect.height / 2) ? (rect.height - b.height - padding) : padding;
-      }
-    }
+            // Images
+            const imgMe = new Image();
+            const imgHer = new Image();
+            imgMe.src = YOUR_IMAGE;
+            imgHer.src = HER_IMAGE;
 
-    noBtn.style.left = x + "px";
-    noBtn.style.top  = y + "px";
-    noBtn.style.transform = "translate(0,0)";
-  }
+            let running = false;
+            let gameOver = false;
+            let won = false;
 
-  // Cute escalating messages
-const lines = [
-  "Tip: No is… kinda shy today 🫣",
-  "Hehe nice try 😌",
-  "Bebu… be serious now 😭",
-  "Your finger is intimidating 👁️👄👁️",
-  "Nope. That answer has been rejected 💌",
-  "Plot twist: the No button is nervous 🫠",
-  "Why would you even look at No 😤",
-  "Bebu pls… my heart is fragile 🥺",
-  "The universe says try again 🌌",
-  "No is currently unavailable ❌",
-  "This button only believes in love 💖",
-  "Thats illegal in Valentine law 🚨💘",
-  "Hmm… suspicious behavior detected 🤨",
-  "I see what you are doing… and I dont like it 😌",
-  "The No button has anxiety 😭",
-  "Bebu stop teasing meee 🥹",
-  "Emotionally, this is not okay 😤",
-  "At this point you are just flirting 😏",
-  "No is running away from commitment 🏃‍♀️💨",
-  "This is a Yes only household 🏠💞",
-  "Even the button ships us 💗",
-  "Okay wow, you are really enjoying this 😭",
-  "The No button is crying now 😢",
-  "Please press Yes and save everyone 😩",
-  "Bebu… my heart cant take this 🥺",
-  "The button believes you love me 😌",
-  "Be honest, you want to press Yes 😘",
-  "Last warning before kisses are deployed 💋",
-  "Alright fine… just say Yes already 💘"
-];
+            const bird = { x: 110, y: H * 0.42, r: 18, vy: 0 };
 
+            let pipes = [];
+            let passed = 0;
 
-  function updateHint() {
-    hint.textContent = lines[Math.min(noAttempts, lines.length - 1)];
-    attemptsEl.textContent = `No attempts: ${noAttempts}`;
-  }
+            // "Her" target
+            let her = null; // {x,y,w,h}
 
-  function sparkle(x, y) {
-    const s = document.createElement("div");
-    s.className = "spark";
-    s.style.left = (x - 5) + "px";
-    s.style.top  = (y - 5) + "px";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 700);
-  }
+            function rand(min, max) { return Math.random() * (max - min) + min; }
 
-  function heartBurst(count = 10) {
-    const rect = stage.getBoundingClientRect();
-    for (let i = 0; i < count; i++) {
-      const h = document.createElement("div");
-      h.className = "heart";
-      h.textContent = ["💗","💖","💞","💕","💘"][Math.floor(Math.random()*5)];
-      h.style.left = (rect.left + rect.width/2 + (Math.random()*120 - 60)) + "px";
-      h.style.top  = (rect.top + rect.height/2 + (Math.random()*60 - 30)) + "px";
-      h.style.fontSize = (16 + Math.random()*14) + "px";
-      document.body.appendChild(h);
-      setTimeout(() => h.remove(), 2000);
-    }
-  }
+            function reset() {
+                running = true; gameOver = false; won = false;
+                bird.y = H * 0.42; bird.vy = 0;
+                pipes = [];
+                passed = 0;
+                her = null;
 
-  // Make "No" dodge proximity on touch/mouse move inside stage
-  function onMove(ev) {
-    const e = ev.touches ? ev.touches[0] : ev;
-    const bx = noBtn.getBoundingClientRect();
-    const dist = Math.hypot((bx.left + bx.width/2) - e.clientX, (bx.top + bx.height/2) - e.clientY);
+                // spawn first pipes
+                for (let i = 0; i < PIPES_BEFORE_HER; i++) {
+                    spawnPipe(W + i * 210);
+                }
+            }
 
-    if (dist < 110) {
-      noAttempts++;
-      updateHint();
-      moveNoButton(e.clientX, e.clientY);
-      sparkle(e.clientX, e.clientY);
+            function spawnPipe(x) {
+                const topMargin = 70;
+                const bottomMargin = FLOOR_H + 70;
+                const gapY = rand(topMargin + GAP / 2, H - bottomMargin - GAP / 2);
+                pipes.push({ x, gapY, scored: false });
+            }
 
-      // make it extra silly after a few attempts
-      if (noAttempts === 3) noBtn.textContent = "No 😳";
-      if (noAttempts === 5) noBtn.textContent = "Still no?? 🥲";
-      if (noAttempts === 7) noBtn.textContent = "I’m RUNNING 🏃‍♀️💨";
-    }
-  }
+            function flap() {
+                if (gameOver || won) {
+                    reset();
+                    bird.vy = FLAP;
+                    return;
+                }
+                if (!running) {
+                    reset();
+                    bird.vy = FLAP;
+                    return;
+                }
+                bird.vy = FLAP;
+            }
 
-  // If she somehow taps the No button (rare), it still escapes
-  noBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    noAttempts++;
-    updateHint();
-    moveNoButton(e.clientX, e.clientY);
-    sparkle(e.clientX, e.clientY);
-  });
+            // Input
+            window.addEventListener("keydown", (e) => {
+                if (e.code === "Space") { e.preventDefault(); flap(); }
+                if (e.key.toLowerCase() === "r") { reset(); }
+            }, { passive: false });
 
-  stage.addEventListener("mousemove", onMove, { passive: true });
-  stage.addEventListener("touchmove", onMove, { passive: true });
+            // Better touch support for mobile
+            const handleTouch = (e) => {
+                if (e.cancelable) e.preventDefault();
+                flap();
+            };
+            canvas.addEventListener("touchstart", handleTouch, { passive: false });
+            canvas.addEventListener("mousedown", flap);
 
-  yesBtn.addEventListener("click", () => {
-    heartBurst(18);
-    love.classList.add("show");
-    // a few more hearts for drama
-    let t = 0;
-    const timer = setInterval(() => {
-      heartBurst(6);
-      t++;
-      if (t > 3) clearInterval(timer);
-    }, 260);
-  });
+            // Collision helper
+            function circleRect(cx, cy, r, rx, ry, rw, rh) {
+                const nx = Math.max(rx, Math.min(cx, rx + rw));
+                const ny = Math.max(ry, Math.min(cy, ry + rh));
+                const dx = cx - nx, dy = cy - ny;
+                // slightly forgiving collision for rectangle bird image
+                return dx * dx + dy * dy <= (r * 0.8) * (r * 0.8);
+            }
 
-  restart.addEventListener("click", () => {
-    love.classList.remove("show");
-    noAttempts = 0;
-    noBtn.textContent = "No 🙃";
-    updateHint();
-    moveNoButton();
-  });
+            function endGame() {
+                if (gameOver) return;
+                gameOver = true;
+                running = false;
+            }
 
-  // initial placement
-  updateHint();
-  moveNoButton();
+            function win() {
+                won = true; running = false;
+            }
 
-  // iOS double-tap zoom prevention for buttons
-  document.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (!document._lastTouchEnd) document._lastTouchEnd = now;
-    const delta = now - document._lastTouchEnd;
-    if (delta < 300) e.preventDefault();
-    document._lastTouchEnd = now;
-  }, { passive: false });
-})();
-</script>
+            function update() {
+                if (!running) return;
+
+                // physics
+                bird.vy += GRAVITY;
+                bird.y += bird.vy;
+
+                const floorY = H - FLOOR_H;
+
+                // ceiling/floor
+                if (bird.y - bird.r < 0) { bird.y = bird.r; bird.vy = 0; }
+                if (bird.y + bird.r > floorY) { bird.y = floorY - bird.r; endGame(); }
+
+                // move pipes until finished
+                for (const p of pipes) p.x -= SPEED;
+
+                // scoring / count passed obstacles
+                for (const p of pipes) {
+                    if (!p.scored && p.x + PIPE_W < bird.x) {
+                        p.scored = true;
+                        passed++;
+                    }
+                }
+
+                // recycle pipes only until we spawn her
+                // when enough pipes are passed, stop spawning new pipes and create her
+                if (!her && passed >= PIPES_BEFORE_HER) {
+                    // clear remaining pipes offscreen quickly
+                    pipes = pipes.filter(p => p.x + PIPE_W > bird.x - 50);
+
+                    // create her "target" on the right
+                    const targetW = 170;
+                    const targetH = 220;
+                    her = {
+                        x: W + 40,
+                        y: Math.max(70, Math.min(floorY - targetH - 20, bird.y - targetH / 2)),
+                        w: targetW,
+                        h: targetH
+                    };
+                }
+
+                // remove pipes that go offscreen
+                pipes = pipes.filter(p => p.x + PIPE_W > -20);
+
+                // If still in pipe phase and we need more pipes, keep a few ahead
+                if (!her) {
+                    const lastX = pipes.length ? pipes[pipes.length - 1].x : 0;
+                    if (lastX < W + 250 && pipes.length < PIPES_BEFORE_HER) {
+                        spawnPipe(Math.max(W + 120, lastX + 210));
+                    }
+                }
+
+                // pipe collision
+                for (const p of pipes) {
+                    const topH = p.gapY - GAP / 2;
+                    const botY = p.gapY + GAP / 2;
+                    const botH = floorY - botY;
+
+                    if (circleRect(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
+                        circleRect(bird.x, bird.y, bird.r, p.x, botY, PIPE_W, botH)) {
+                        endGame();
+                        return;
+                    }
+                }
+
+                // Move her into scene and detect "reach"
+                if (her) {
+                    her.x -= SPEED;
+
+                    // simple “reach” condition: your face touches her photo
+                    if (circleRect(bird.x, bird.y, bird.r, her.x, her.y, her.w, her.h)) {
+                        win();
+                    }
+
+                    // if you somehow miss and go too far, just end
+                    if (her.x + her.w < -10) endGame();
+                }
+            }
+
+            function drawBackground() {
+                // sky already via canvas background; add simple clouds
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                for (let i = 0; i < 5; i++) {
+                    const x = (i * 90 + (Date.now() / 30)) % (W + 120) - 60;
+                    const y = 70 + (i % 3) * 26;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 16, 0, Math.PI * 2);
+                    ctx.arc(x + 18, y - 10, 18, 0, Math.PI * 2);
+                    ctx.arc(x + 38, y, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function drawGround() {
+                const floorY = H - FLOOR_H;
+                ctx.fillStyle = "#a16207";
+                ctx.fillRect(0, floorY, W, FLOOR_H);
+                ctx.fillStyle = "#22c55e";
+                ctx.fillRect(0, floorY, W, 16);
+            }
+
+            function drawPipes() {
+                const floorY = H - FLOOR_H;
+                for (const p of pipes) {
+                    const topH = p.gapY - GAP / 2;
+                    const botY = p.gapY + GAP / 2;
+                    const botH = floorY - botY;
+
+                    ctx.fillStyle = "#16a34a";
+                    ctx.fillRect(p.x, 0, PIPE_W, topH);
+                    ctx.fillRect(p.x, botY, PIPE_W, botH);
+
+                    ctx.strokeStyle = "rgba(0,0,0,0.18)";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x, 0, PIPE_W, topH);
+                    ctx.strokeRect(p.x, botY, PIPE_W, botH);
+                }
+            }
+
+            function drawBird() {
+                // Draw image directly without circle clip/border
+                const size = bird.r * 2.8; // slightly larger to compensate visual weight
+                const x = bird.x - size / 2;
+                const y = bird.y - size / 2;
+
+                if (imgMe.complete && imgMe.naturalWidth) {
+                    ctx.drawImage(imgMe, x, y, size, size);
+                } else {
+                    // fallback if image not loaded
+                    ctx.beginPath();
+                    ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "#fbbf24";
+                    ctx.fill();
+                }
+            }
+
+            function drawHerTarget() {
+                if (!her) return;
+
+                // photo
+                if (imgHer.complete && imgHer.naturalWidth) {
+                    ctx.save();
+                    // rounded rect clip
+                    const r = 14;
+                    roundRect(her.x, her.y, her.w, her.h, r);
+                    ctx.clip();
+                    ctx.drawImage(imgHer, her.x, her.y, her.w, her.h);
+                    ctx.restore();
+
+                    // border
+                    ctx.strokeStyle = "rgba(255,255,255,0.85)";
+                    ctx.lineWidth = 3;
+                    roundRect(her.x, her.y, her.w, her.h, 14);
+                    ctx.stroke();
+
+                    // heart over her heart region (adjust offsets at top)
+                    const heartX = her.x + her.w / 2 + HEART_OFFSET_X;
+                    const heartY = her.y + HEART_OFFSET_Y + 60;
+
+                    drawHeart(heartX, heartY, 16);
+                } else {
+                    // fallback box
+                    ctx.fillStyle = "rgba(255,255,255,0.6)";
+                    ctx.fillRect(her.x, her.y, her.w, her.h);
+                }
+            }
+
+            function drawUI() {
+                // small counter
+                ctx.fillStyle = "rgba(15,23,42,0.75)";
+                ctx.font = "700 16px system-ui,Segoe UI,Roboto,Arial";
+                ctx.textAlign = "left";
+                ctx.fillText(`Obstacles: ${Math.min(passed, PIPES_BEFORE_HER)}/${PIPES_BEFORE_HER}`, 12, 24);
+
+                if (!running && !gameOver && !won) {
+                    ctx.textAlign = "center";
+                    ctx.font = "900 22px system-ui,Segoe UI,Roboto,Arial";
+                    ctx.fillText("Tap to Start", W / 2, H / 2 - 10);
+                    ctx.font = "600 14px system-ui,Segoe UI,Roboto,Arial";
+                    ctx.fillText("After a few obstacles… she’s waiting 💘", W / 2, H / 2 + 18);
+                }
+
+                if (gameOver) {
+                    overlayBox("Oops!", ["Try again 😄", "Tap to restart"], true);
+                }
+
+                if (won) {
+                    // Break the long message into lines that fit in the box
+                    const wrappedLines = wrapText(ctx, MESSAGE_TEXT, 260); // 260px max width
+                    overlayBox(MESSAGE_TITLE, wrappedLines, false);
+                }
+            }
+
+            // Helper to wrap text
+            function wrapText(context, text, maxWidth) {
+                const words = text.split(' ');
+                let lines = [];
+                let currentLine = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    const word = words[i];
+                    const width = context.measureText(currentLine + " " + word).width;
+                    if (width < maxWidth) {
+                        currentLine += " " + word;
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            }
+
+            function overlayBox(title, lines, isShort) {
+                ctx.fillStyle = "rgba(0,0,0,0.45)";
+                ctx.fillRect(0, 0, W, H);
+
+                const lineHeight = 20; // smaller font for long text
+                const padding = 20;
+                const titleHeight = 46;
+                const footerHeight = 40;
+
+                // Calculate dynamic height
+                let contentHeight = lines.length * lineHeight;
+                if (isShort) contentHeight = lines.length * 26; // taller lines for short messages
+
+                let boxH = titleHeight + contentHeight + footerHeight + padding;
+                // constrain max height
+                boxH = Math.min(boxH, H - 40);
+
+                const boxW = 300;
+                const bx = (W - boxW) / 2, by = (H - boxH) / 2;
+
+                ctx.fillStyle = "rgba(255,255,255,0.92)";
+                roundRect(bx, by, boxW, boxH, 18);
+                ctx.fill();
+
+                ctx.fillStyle = "#0b1220";
+                ctx.textAlign = "center";
+                ctx.font = "900 24px system-ui,Segoe UI,Roboto,Arial";
+                ctx.fillText(title, W / 2, by + titleHeight - 10);
+
+                // Draw Text body
+                if (isShort) {
+                    ctx.font = "650 16px system-ui,Segoe UI,Roboto,Arial";
+                } else {
+                    ctx.font = "500 14px system-ui,Segoe UI,Roboto,Arial"; // smaller font for long love letter
+                }
+
+                let y = by + titleHeight + 20;
+                for (const line of lines) {
+                    ctx.fillText(line, W / 2, y);
+                    y += isShort ? 26 : lineHeight;
+                }
+
+                ctx.font = "700 13px system-ui,Segoe UI,Roboto,Arial";
+                ctx.fillStyle = "rgba(11,18,32,0.65)";
+                ctx.fillText("Tap to play again", W / 2, by + boxH - 15);
+            }
+
+            function roundRect(x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+            }
+
+            function drawHeart(x, y, s) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.beginPath();
+                ctx.moveTo(0, s / 2);
+                ctx.bezierCurveTo(0, 0, -s, 0, -s, -s / 2);
+                ctx.bezierCurveTo(-s, -s * 1.2, 0, -s * 1.2, 0, -s / 2);
+                ctx.bezierCurveTo(0, -s * 1.2, s, -s * 1.2, s, -s / 2);
+                ctx.bezierCurveTo(s, 0, 0, 0, 0, s / 2);
+                ctx.closePath();
+
+                ctx.fillStyle = "#ff2d55";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(0,0,0,0.18)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                drawBackground();
+                drawPipes();
+                drawHerTarget();
+                drawGround();
+                drawBird();
+                drawUI();
+            }
+
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+
+            // Start in idle screen
+            running = false;
+            draw();
+            requestAnimationFrame(loop);
+
+            // If images fail to load, still playable with fallback shapes
+        })();
+    </script>
 </body>
+
 </html>
