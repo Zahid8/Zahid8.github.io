@@ -40,6 +40,97 @@
             pointer-events: none;
             /* Let clicks pass through to canvas if needed */
         }
+
+        /* Win Screen Overlay */
+        #win-screen {
+            display: none;
+            /* hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(4px);
+        }
+
+        #win-box {
+            background: rgba(255, 255, 255, 0.95);
+            width: min(90vw, 340px);
+            max-height: 80vh;
+            border-radius: 18px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #win-title {
+            margin: 0 0 16px 0;
+            font-size: 26px;
+            font-weight: 900;
+            color: #0b1220;
+        }
+
+        #win-message {
+            flex: 1;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #334155;
+            margin-bottom: 20px;
+            padding-right: 8px;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        #win-message::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #win-message::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        #restart-btn {
+            background: #ff2d55;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s;
+        }
+
+        #restart-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
 
@@ -47,6 +138,15 @@
     <div>
         <canvas id="c" width="360" height="640"></canvas>
         <div class="hint">Tap / Click / Space to flap · R to restart</div>
+    </div>
+
+    <!-- DOM-based Win Screen -->
+    <div id="win-screen">
+        <div id="win-box">
+            <h2 id="win-title">Title</h2>
+            <div id="win-message">Message goes here...</div>
+            <button id="restart-btn">Restart Game</button>
+        </div>
     </div>
 
     <script>
@@ -80,7 +180,7 @@
             const FLOOR_H = 70;
 
             // Make it short: after 3-4 obstacles, show her
-            const PIPES_BEFORE_HER = 10; // set 3 or 4
+            const PIPES_BEFORE_HER = 19; // set 3 or 4
 
             // Images
             const imgMe = new Image();
@@ -123,7 +223,11 @@
             }
 
             function flap() {
-                if (gameOver || won) {
+                // If the user has won, input on the canvas is ignored.
+                // Restart must be done via the button.
+                if (won) return;
+
+                if (gameOver) {
                     reset();
                     bird.vy = FLAP;
                     return;
@@ -135,6 +239,14 @@
                 }
                 bird.vy = FLAP;
             }
+
+            // Button listener
+            document.getElementById("restart-btn").addEventListener("click", (e) => {
+                e.stopPropagation(); // prevent canvas click
+                document.getElementById("win-screen").style.display = "none";
+                reset();
+                bird.vy = 0; // reset velocity properly
+            });
 
             // Input
             window.addEventListener("keydown", (e) => {
@@ -167,6 +279,15 @@
 
             function win() {
                 won = true; running = false;
+                // Show DOM overlay
+                const winScreen = document.getElementById("win-screen");
+                const winTitle = document.getElementById("win-title");
+                const winMsg = document.getElementById("win-message");
+
+                winTitle.innerText = MESSAGE_TITLE;
+                winMsg.innerText = MESSAGE_TEXT;
+
+                winScreen.style.display = "flex";
             }
 
             function update() {
@@ -356,9 +477,7 @@
                 }
 
                 if (won) {
-                    // Break the long message into lines that fit in the box
-                    const wrappedLines = wrapText(ctx, MESSAGE_TEXT, 260); // 260px max width
-                    overlayBox(MESSAGE_TITLE, wrappedLines, false);
+                    // Do nothing here, DOM overlay handles it
                 }
             }
 
