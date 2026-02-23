@@ -1,606 +1,494 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>For Her 💘</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100dvh;
-            /* Use dynamic viewport height for mobile browsers */
-            display: grid;
-            place-items: center;
-            background: #0b1220;
-            font-family: system-ui, Segoe UI, Roboto, Arial;
-            overflow: hidden;
-            /* Prevent scrolling */
-            touch-action: none;
-            /* Disable default touch actions like scroll/zoom */
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stack Builder 💛</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --card:rgba(15,23,48,.78);
+      --stroke:rgba(255,255,255,.14);
+      --text:#f4f6ff;
+      --muted:#b9c0ff;
+      --accent:#ffd166;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 600px at 70% 10%, #1a2a66 0%, transparent 55%),
+        radial-gradient(800px 550px at 20% 80%, #4b1a66 0%, transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow:hidden;
+      color:var(--text);
+    }
+    .wrap{
+      height:100%;
+      display:grid;
+      place-items:center;
+      position:relative;
+      padding:18px;
+    }
+    canvas{
+      width:min(92vw,820px);
+      height:auto;
+      max-height:88vh;
+      border-radius:22px;
+      background: linear-gradient(180deg, #0d1430 0%, #070b18 100%);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.08);
+      touch-action: manipulation;
+    }
+    .hint{
+      position:absolute;
+      bottom:14px;
+      left:50%;
+      transform:translateX(-50%);
+      width:min(92vw,820px);
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .pill{
+      background: var(--card);
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      padding:10px 12px;
+      border-radius:999px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.22);
+      color:var(--muted);
+      font-size:13px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
 
-        canvas {
-            width: min(100vw, 420px);
-            /* Fill width on mobile */
-            height: auto;
-            max-height: 100dvh;
-            border-radius: 14px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, .35);
-            background: linear-gradient(#8dd7ff, #35b9ff);
-            touch-action: none;
-        }
+    /* ===== WIN / LOSE HTML overlays ===== */
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      place-items:center;
+      padding:18px;
+      background:
+        radial-gradient(900px 600px at 50% 20%, rgba(255,209,102,.16), transparent 60%),
+        rgba(0,0,0,.58);
+      z-index:10;
+    }
+    .overlay.show{ display:grid; }
 
-        .hint {
-            color: #cbd5e1;
-            margin-top: 10px;
-            font-size: 14px;
-            text-align: center;
-            opacity: .9;
-            pointer-events: none;
-            /* Let clicks pass through to canvas if needed */
-        }
+    .card{
+      width:min(92vw,720px);
+      max-height:min(86vh,820px);
+      background: rgba(15,23,48,.88);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:24px;
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .title{
+      font-size:22px;
+      font-weight:800;
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      line-height:1.35;
+      font-size:14px;
+    }
 
-        /* Win Screen Overlay */
-        #win-screen {
-            display: none;
-            /* hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.65);
-            z-index: 100;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
-            backdrop-filter: blur(4px);
-        }
+    .scrollBox{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:14px;
+      overflow:auto;
+      max-height:52vh; /* key part */
+      white-space:pre-wrap; /* keeps your line breaks */
+      line-height:1.55;
+      font-size:15px;
+      color: rgba(244,246,255,.95);
+    }
 
-        #win-box {
-            background: rgba(255, 255, 255, 0.95);
-            width: min(90vw, 340px);
-            max-height: 80vh;
-            border-radius: 18px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    /* nice scrollbar */
+    .scrollBox::-webkit-scrollbar{ width:10px; }
+    .scrollBox::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.18);
+      border-radius:999px;
+      border:2px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+    }
 
-        @keyframes popIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        #win-title {
-            margin: 0 0 16px 0;
-            font-size: 26px;
-            font-weight: 900;
-            color: #0b1220;
-        }
-
-        #win-message {
-            flex: 1;
-            overflow-y: auto;
-            text-align: left;
-            font-size: 15px;
-            line-height: 1.5;
-            color: #334155;
-            margin-bottom: 20px;
-            padding-right: 8px;
-            /* Scrollbar styling */
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
-        }
-
-        #win-message::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #win-message::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        #restart-btn {
-            background: #ff2d55;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.1s;
-        }
-
-        #restart-btn:active {
-            transform: scale(0.96);
-        }
-    </style>
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      all:unset;
+      cursor:pointer;
+      user-select:none;
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:750;
+      font-size:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+    .btn:hover{ background: rgba(255,255,255,.12); }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(255,209,102,.98), rgba(255,209,102,.82));
+      color:#1c1403;
+      border:1px solid rgba(255,209,102,.25);
+    }
+    .tiny{
+      margin:0;
+      color:rgba(185,192,255,.9);
+      font-size:12px;
+    }
+  </style>
 </head>
-
 <body>
-    <div>
-        <canvas id="c" width="360" height="640"></canvas>
-        <div class="hint">Tap / Click / Space to flap · R to restart</div>
+<div class="wrap">
+  <canvas id="myCanvas" width="800" height="600"></canvas>
+  <div class="hint"><div class="pill">Tap / Click to drop a block</div></div>
+
+  <!-- WIN overlay -->
+  <div id="winOverlay" class="overlay" role="dialog" aria-modal="true">
+    <div class="card">
+      <h2 class="title">💛 You did it!</h2>
+      <p class="sub">Scroll down to read your surprise message 💌</p>
+
+      <div id="loveBox" class="scrollBox"></div>
+
+      <div class="row">
+        <button class="btn" id="copyBtn">Copy message</button>
+        <button class="btn primary" id="playAgainBtn">Play again</button>
+      </div>
+      <p class="tiny">Tip: you can scroll inside the message box.</p>
     </div>
+  </div>
 
-    <!-- DOM-based Win Screen -->
-    <div id="win-screen">
-        <div id="win-box">
-            <h2 id="win-title">Title</h2>
-            <div id="win-message">Message goes here...</div>
-            <button id="restart-btn">Restart Game</button>
-        </div>
+  <!-- LOSE overlay (optional, nicer) -->
+  <div id="loseOverlay" class="overlay" role="dialog" aria-modal="true">
+    <div class="card" style="max-height:none">
+      <h2 class="title">💥 Game Over</h2>
+      <p class="sub" id="loseText">Click play again to retry.</p>
+      <div class="row">
+        <button class="btn primary" id="tryAgainBtn">Play again</button>
+      </div>
     </div>
-
-    <script>
-        (() => {
-            const canvas = document.getElementById("c");
-            const ctx = canvas.getContext("2d");
-            const W = canvas.width, H = canvas.height;
-
-            // ====== YOU CUSTOMIZE THESE ======
-            const YOUR_IMAGE = "me.png";
-            const HER_IMAGE = "her.png"; // change to "her.png" if needed
-
-            // Place heart on her chest area (tweak these if needed)
-            const HEART_OFFSET_X = 10;   // +right / -left relative to her image center
-            const HEART_OFFSET_Y = 30;   // +down / -up relative to her image top
-
-            // Romantic message (edit freely)
-            const MESSAGE_TITLE = "For Bebu 💖";
-            // Updated to be a single string for auto-wrapping
-            const MESSAGE_TEXT = "Baby honestly mujhe samajh nahi aata mei kaise explain karu, but you have become such an important part of my life. Aur jab mei aapko nahi dekhta then har cheez kharab si lagne lag jati hai. Mood off ho jata hai, din incomplete sa feel hota hai. Aur jab mei aapko nahi dekhta, it feels like something is missing. Like my day is not even proper without you. Your laugh, seriously it makes everything better. Jab aap hasti ho na, mujhe lagta hai sab theek hai. Mei aapki itni care karta hu ki agar aap upset hoti ho, toh mujhe bhi chain nahi milta. Aur jab aap khana nahi khati, to I feel ki mei khud apne haath se khila sakta aapko. Aap meri motivation ban gayi ho. My reason to keep going, to keep living, to keep trying. Aapki presence mere dil ko pura light up kar deti hai. So, bebu, I ask you this, I have fallen so hard for you, so hard it hurts, so hard I cannot think straight, so hard that I can only, think about you, but I would like to know, if I have your permission, to fall even harder, even deeper in love with you?";
-
-            // =================================
-
-            // Simple physics/settings
-            const GRAVITY = 0.38;
-            const FLAP = -7.0;
-            const SPEED = 2.4;
-
-            const PIPE_W = 58;
-            const GAP = 150;
-            const FLOOR_H = 70;
-
-            // Make it short: after 3-4 obstacles, show her
-            const PIPES_BEFORE_HER = 19; // set 3 or 4
-
-            // Images
-            const imgMe = new Image();
-            const imgHer = new Image();
-            imgMe.src = YOUR_IMAGE;
-            imgHer.src = HER_IMAGE;
-
-            let running = false;
-            let gameOver = false;
-            let won = false;
-
-            const bird = { x: 110, y: H * 0.42, r: 18, vy: 0 };
-
-            let pipes = [];
-            let passed = 0;
-
-            // "Her" target
-            let her = null; // {x,y,w,h}
-
-            function rand(min, max) { return Math.random() * (max - min) + min; }
-
-            function reset() {
-                running = true; gameOver = false; won = false;
-                bird.y = H * 0.42; bird.vy = 0;
-                pipes = [];
-                passed = 0;
-                her = null;
-
-                // spawn first pipes
-                for (let i = 0; i < PIPES_BEFORE_HER; i++) {
-                    spawnPipe(W + i * 210);
-                }
-            }
-
-            function spawnPipe(x) {
-                const topMargin = 70;
-                const bottomMargin = FLOOR_H + 70;
-                const gapY = rand(topMargin + GAP / 2, H - bottomMargin - GAP / 2);
-                pipes.push({ x, gapY, scored: false });
-            }
-
-            function flap() {
-                // If the user has won, input on the canvas is ignored.
-                // Restart must be done via the button.
-                if (won) return;
-
-                if (gameOver) {
-                    reset();
-                    bird.vy = FLAP;
-                    return;
-                }
-                if (!running) {
-                    reset();
-                    bird.vy = FLAP;
-                    return;
-                }
-                bird.vy = FLAP;
-            }
-
-            // Button listener
-            document.getElementById("restart-btn").addEventListener("click", (e) => {
-                e.stopPropagation(); // prevent canvas click
-                document.getElementById("win-screen").style.display = "none";
-                reset();
-                bird.vy = 0; // reset velocity properly
-            });
-
-            // Input
-            window.addEventListener("keydown", (e) => {
-                if (e.code === "Space") { e.preventDefault(); flap(); }
-                if (e.key.toLowerCase() === "r") { reset(); }
-            }, { passive: false });
-
-            // Better touch support for mobile
-            const handleTouch = (e) => {
-                if (e.cancelable) e.preventDefault();
-                flap();
-            };
-            canvas.addEventListener("touchstart", handleTouch, { passive: false });
-            canvas.addEventListener("mousedown", flap);
-
-            // Collision helper
-            function circleRect(cx, cy, r, rx, ry, rw, rh) {
-                const nx = Math.max(rx, Math.min(cx, rx + rw));
-                const ny = Math.max(ry, Math.min(cy, ry + rh));
-                const dx = cx - nx, dy = cy - ny;
-                // slightly forgiving collision for rectangle bird image
-                return dx * dx + dy * dy <= (r * 0.8) * (r * 0.8);
-            }
-
-            function endGame() {
-                if (gameOver) return;
-                gameOver = true;
-                running = false;
-            }
-
-            function win() {
-                won = true; running = false;
-                // Show DOM overlay
-                const winScreen = document.getElementById("win-screen");
-                const winTitle = document.getElementById("win-title");
-                const winMsg = document.getElementById("win-message");
-
-                winTitle.innerText = MESSAGE_TITLE;
-                winMsg.innerText = MESSAGE_TEXT;
-
-                winScreen.style.display = "flex";
-            }
-
-            function update() {
-                if (!running) return;
-
-                // physics
-                bird.vy += GRAVITY;
-                bird.y += bird.vy;
-
-                const floorY = H - FLOOR_H;
-
-                // ceiling/floor
-                if (bird.y - bird.r < 0) { bird.y = bird.r; bird.vy = 0; }
-                if (bird.y + bird.r > floorY) { bird.y = floorY - bird.r; endGame(); }
-
-                // move pipes until finished
-                for (const p of pipes) p.x -= SPEED;
-
-                // scoring / count passed obstacles
-                for (const p of pipes) {
-                    if (!p.scored && p.x + PIPE_W < bird.x) {
-                        p.scored = true;
-                        passed++;
-                    }
-                }
-
-                // recycle pipes only until we spawn her
-                // when enough pipes are passed, stop spawning new pipes and create her
-                if (!her && passed >= PIPES_BEFORE_HER) {
-                    // clear remaining pipes offscreen quickly
-                    pipes = pipes.filter(p => p.x + PIPE_W > bird.x - 50);
-
-                    // create her "target" on the right
-                    const targetW = 170;
-                    const targetH = 220;
-                    her = {
-                        x: W + 40,
-                        y: Math.max(70, Math.min(floorY - targetH - 20, bird.y - targetH / 2)),
-                        w: targetW,
-                        h: targetH
-                    };
-                }
-
-                // remove pipes that go offscreen
-                pipes = pipes.filter(p => p.x + PIPE_W > -20);
-
-                // If still in pipe phase and we need more pipes, keep a few ahead
-                if (!her) {
-                    const lastX = pipes.length ? pipes[pipes.length - 1].x : 0;
-                    if (lastX < W + 250 && pipes.length < PIPES_BEFORE_HER) {
-                        spawnPipe(Math.max(W + 120, lastX + 210));
-                    }
-                }
-
-                // pipe collision
-                for (const p of pipes) {
-                    const topH = p.gapY - GAP / 2;
-                    const botY = p.gapY + GAP / 2;
-                    const botH = floorY - botY;
-
-                    if (circleRect(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
-                        circleRect(bird.x, bird.y, bird.r, p.x, botY, PIPE_W, botH)) {
-                        endGame();
-                        return;
-                    }
-                }
-
-                // Move her into scene and detect "reach"
-                if (her) {
-                    her.x -= SPEED;
-
-                    // simple “reach” condition: your face touches her photo
-                    if (circleRect(bird.x, bird.y, bird.r, her.x, her.y, her.w, her.h)) {
-                        win();
-                    }
-
-                    // if you somehow miss and go too far, just end
-                    if (her.x + her.w < -10) endGame();
-                }
-            }
-
-            function drawBackground() {
-                // sky already via canvas background; add simple clouds
-                ctx.fillStyle = "rgba(255,255,255,0.8)";
-                for (let i = 0; i < 5; i++) {
-                    const x = (i * 90 + (Date.now() / 30)) % (W + 120) - 60;
-                    const y = 70 + (i % 3) * 26;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 16, 0, Math.PI * 2);
-                    ctx.arc(x + 18, y - 10, 18, 0, Math.PI * 2);
-                    ctx.arc(x + 38, y, 14, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            function drawGround() {
-                const floorY = H - FLOOR_H;
-                ctx.fillStyle = "#a16207";
-                ctx.fillRect(0, floorY, W, FLOOR_H);
-                ctx.fillStyle = "#22c55e";
-                ctx.fillRect(0, floorY, W, 16);
-            }
-
-            function drawPipes() {
-                const floorY = H - FLOOR_H;
-                for (const p of pipes) {
-                    const topH = p.gapY - GAP / 2;
-                    const botY = p.gapY + GAP / 2;
-                    const botH = floorY - botY;
-
-                    ctx.fillStyle = "#16a34a";
-                    ctx.fillRect(p.x, 0, PIPE_W, topH);
-                    ctx.fillRect(p.x, botY, PIPE_W, botH);
-
-                    ctx.strokeStyle = "rgba(0,0,0,0.18)";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(p.x, 0, PIPE_W, topH);
-                    ctx.strokeRect(p.x, botY, PIPE_W, botH);
-                }
-            }
-
-            function drawBird() {
-                // Draw image directly without circle clip/border
-                const size = bird.r * 2.8; // slightly larger to compensate visual weight
-                const x = bird.x - size / 2;
-                const y = bird.y - size / 2;
-
-                if (imgMe.complete && imgMe.naturalWidth) {
-                    ctx.drawImage(imgMe, x, y, size, size);
-                } else {
-                    // fallback if image not loaded
-                    ctx.beginPath();
-                    ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
-                    ctx.fillStyle = "#fbbf24";
-                    ctx.fill();
-                }
-            }
-
-            function drawHerTarget() {
-                if (!her) return;
-
-                // photo
-                if (imgHer.complete && imgHer.naturalWidth) {
-                    ctx.save();
-                    // rounded rect clip
-                    const r = 14;
-                    roundRect(her.x, her.y, her.w, her.h, r);
-                    ctx.clip();
-                    ctx.drawImage(imgHer, her.x, her.y, her.w, her.h);
-                    ctx.restore();
-
-                    // border
-                    ctx.strokeStyle = "rgba(255,255,255,0.85)";
-                    ctx.lineWidth = 3;
-                    roundRect(her.x, her.y, her.w, her.h, 14);
-                    ctx.stroke();
-
-                    // heart over her heart region (adjust offsets at top)
-                    const heartX = her.x + her.w / 2 + HEART_OFFSET_X;
-                    const heartY = her.y + HEART_OFFSET_Y + 60;
-
-                    drawHeart(heartX, heartY, 16);
-                } else {
-                    // fallback box
-                    ctx.fillStyle = "rgba(255,255,255,0.6)";
-                    ctx.fillRect(her.x, her.y, her.w, her.h);
-                }
-            }
-
-            function drawUI() {
-                // small counter
-                ctx.fillStyle = "rgba(15,23,42,0.75)";
-                ctx.font = "700 16px system-ui,Segoe UI,Roboto,Arial";
-                ctx.textAlign = "left";
-                ctx.fillText(`Obstacles: ${Math.min(passed, PIPES_BEFORE_HER)}/${PIPES_BEFORE_HER}`, 12, 24);
-
-                if (!running && !gameOver && !won) {
-                    ctx.textAlign = "center";
-                    ctx.font = "900 22px system-ui,Segoe UI,Roboto,Arial";
-                    ctx.fillText("Tap to Start", W / 2, H / 2 - 10);
-                    ctx.font = "600 14px system-ui,Segoe UI,Roboto,Arial";
-                    ctx.fillText("After a few obstacles… she’s waiting 💘", W / 2, H / 2 + 18);
-                }
-
-                if (gameOver) {
-                    overlayBox("Oops!", ["Try again 😄", "Tap to restart"], true);
-                }
-
-                if (won) {
-                    // Do nothing here, DOM overlay handles it
-                }
-            }
-
-            // Helper to wrap text
-            function wrapText(context, text, maxWidth) {
-                const words = text.split(' ');
-                let lines = [];
-                let currentLine = words[0];
-
-                for (let i = 1; i < words.length; i++) {
-                    const word = words[i];
-                    const width = context.measureText(currentLine + " " + word).width;
-                    if (width < maxWidth) {
-                        currentLine += " " + word;
-                    } else {
-                        lines.push(currentLine);
-                        currentLine = word;
-                    }
-                }
-                lines.push(currentLine);
-                return lines;
-            }
-
-            function overlayBox(title, lines, isShort) {
-                ctx.fillStyle = "rgba(0,0,0,0.45)";
-                ctx.fillRect(0, 0, W, H);
-
-                const lineHeight = 20; // smaller font for long text
-                const padding = 20;
-                const titleHeight = 46;
-                const footerHeight = 40;
-
-                // Calculate dynamic height
-                let contentHeight = lines.length * lineHeight;
-                if (isShort) contentHeight = lines.length * 26; // taller lines for short messages
-
-                let boxH = titleHeight + contentHeight + footerHeight + padding;
-                // constrain max height
-                boxH = Math.min(boxH, H - 40);
-
-                const boxW = 300;
-                const bx = (W - boxW) / 2, by = (H - boxH) / 2;
-
-                ctx.fillStyle = "rgba(255,255,255,0.92)";
-                roundRect(bx, by, boxW, boxH, 18);
-                ctx.fill();
-
-                ctx.fillStyle = "#0b1220";
-                ctx.textAlign = "center";
-                ctx.font = "900 24px system-ui,Segoe UI,Roboto,Arial";
-                ctx.fillText(title, W / 2, by + titleHeight - 10);
-
-                // Draw Text body
-                if (isShort) {
-                    ctx.font = "650 16px system-ui,Segoe UI,Roboto,Arial";
-                } else {
-                    ctx.font = "500 14px system-ui,Segoe UI,Roboto,Arial"; // smaller font for long love letter
-                }
-
-                let y = by + titleHeight + 20;
-                for (const line of lines) {
-                    ctx.fillText(line, W / 2, y);
-                    y += isShort ? 26 : lineHeight;
-                }
-
-                ctx.font = "700 13px system-ui,Segoe UI,Roboto,Arial";
-                ctx.fillStyle = "rgba(11,18,32,0.65)";
-                ctx.fillText("Tap to play again", W / 2, by + boxH - 15);
-            }
-
-            function roundRect(x, y, w, h, r) {
-                ctx.beginPath();
-                ctx.moveTo(x + r, y);
-                ctx.arcTo(x + w, y, x + w, y + h, r);
-                ctx.arcTo(x + w, y + h, x, y + h, r);
-                ctx.arcTo(x, y + h, x, y, r);
-                ctx.arcTo(x, y, x + w, y, r);
-                ctx.closePath();
-            }
-
-            function drawHeart(x, y, s) {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.beginPath();
-                ctx.moveTo(0, s / 2);
-                ctx.bezierCurveTo(0, 0, -s, 0, -s, -s / 2);
-                ctx.bezierCurveTo(-s, -s * 1.2, 0, -s * 1.2, 0, -s / 2);
-                ctx.bezierCurveTo(0, -s * 1.2, s, -s * 1.2, s, -s / 2);
-                ctx.bezierCurveTo(s, 0, 0, 0, 0, s / 2);
-                ctx.closePath();
-
-                ctx.fillStyle = "#ff2d55";
-                ctx.fill();
-                ctx.strokeStyle = "rgba(0,0,0,0.18)";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.restore();
-            }
-
-            function draw() {
-                ctx.clearRect(0, 0, W, H);
-                drawBackground();
-                drawPipes();
-                drawHerTarget();
-                drawGround();
-                drawBird();
-                drawUI();
-            }
-
-            function loop() {
-                update();
-                draw();
-                requestAnimationFrame(loop);
-            }
-
-            // Start in idle screen
-            running = false;
-            draw();
-            requestAnimationFrame(loop);
-
-            // If images fail to load, still playable with fallback shapes
-        })();
-    </script>
+  </div>
+</div>
+
+<script>
+let canvas = document.getElementById("myCanvas");
+let context = canvas.getContext("2d");
+context.textBaseline = "top";
+
+// --- Customize ---
+const WIN_SCORE = 10;
+const LOVE_MESSAGE = `You did it my love!
+
+Mei aapse itna zyada pyaar karta hoon ke kabhi kabhi khud samajh nahi paata ke itna kaise ho sakta hai. Aap meri aadat ban chuki hai… aur sach bolun to meri zarurat bhi. Aapse thodi der baat na ho ya kuch minutes door rehna pade, dil ajeeb sa heavy ho jata hai. Aisa lagta hai jese kuch missing ho.
+Mene aapko hurt kiya kal, and kuch aisa bola ho jo nahi bolna chahiye tha, I am really really sorry bebu. Mera intention kabhi bhi aapko sad karna nhi tha. Main bas aapse bohot zyada attached hoon.
+Mei aap par poora trust karta hoon. From my heart. Mujhe aapse koi doubt nahi hai, kabhi nahi hoga. Bas mei thoda possessive ho jata hoon… kyunki mei aapse itna obsessed hoon, itna pyaar karta hoon ke kabhi kabhi darr lagta hai ke kahi aapko kho na doon. Mei promise karta hoon ke future mei mei apne aap ko better banaunga. Mei try karunga ki mei zyada secure rahun, zyada mature rahun, sirf aapke liye, hamare liye.
+You are my world. Aapki smile, aapki awaaz, aapki harkatein, sab kuch mujhe pagal kar deti hai(in a good way). Mei sach mei aapse bohot bohot zyada pyaar karta hoon. Aur hamesha karta rahunga.
+
+Always yours `;
+// ----------------
+
+// overlays
+const winOverlay = document.getElementById("winOverlay");
+const loseOverlay = document.getElementById("loseOverlay");
+const loveBox = document.getElementById("loveBox");
+const copyBtn = document.getElementById("copyBtn");
+const playAgainBtn = document.getElementById("playAgainBtn");
+const tryAgainBtn = document.getElementById("tryAgainBtn");
+const loseText = document.getElementById("loseText");
+
+// inject message (scrollable!)
+loveBox.textContent = LOVE_MESSAGE;
+
+// Game vars (your originals)
+let scrollCounter, cameraY, current, mode, xSpeed;
+let ySpeed = 5;
+let height = 50;
+let boxes = [];
+boxes[0] = { x: 300, y: 300, width: 200 };
+
+let debris = { x: 0, width: 0, y: 0 };
+
+// Look constants
+const GROUND_Y = 600;
+const RADIUS = 12;
+
+function roundRect(ctx, x, y, w, h, r){
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr, y);
+  ctx.arcTo(x+w, y, x+w, y+h, rr);
+  ctx.arcTo(x+w, y+h, x, y+h, rr);
+  ctx.arcTo(x, y+h, x, y, rr);
+  ctx.arcTo(x, y, x+w, y, rr);
+  ctx.closePath();
+}
+
+function drawBackground(){
+  context.save();
+  context.clearRect(0,0,canvas.width,canvas.height);
+
+  // soft glow
+  const g = context.createRadialGradient(580, 120, 80, 400, 320, 680);
+  g.addColorStop(0, "rgba(255,209,102,0.10)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  context.fillStyle = g;
+  context.fillRect(0,0,canvas.width,canvas.height);
+
+  // stars
+  context.globalAlpha = 0.18;
+  context.fillStyle = "white";
+  const t = Date.now()*0.02;
+  for (let i=0;i<34;i++){
+    const x = (i*97 + t) % canvas.width;
+    const y = (i*53) % canvas.height;
+    context.fillRect(x, y, 2, 2);
+  }
+  context.restore();
+
+  // ground haze
+  context.save();
+  context.globalAlpha = 0.10;
+  context.fillStyle = "#ffd166";
+  context.fillRect(0, 520, canvas.width, 120);
+  context.restore();
+}
+
+function blockColor(n){
+  const palette = ["#ffd166","#ff8fab","#9bf6ff","#bdb2ff","#caffbf","#ffadad"];
+  return palette[n % palette.length];
+}
+
+function drawBlock(box, n){
+  const screenY = GROUND_Y - box.y + cameraY;
+  const x = box.x;
+  const y = screenY;
+
+  // shadow
+  context.save();
+  context.globalAlpha = 0.25;
+  context.fillStyle = "rgba(0,0,0,.55)";
+  roundRect(context, x+2, y+6, box.width, height, RADIUS);
+  context.fill();
+  context.restore();
+
+  // gradient fill
+  const grad = context.createLinearGradient(x, y, x, y+height);
+  const c = blockColor(n);
+  grad.addColorStop(0, c);
+  grad.addColorStop(1, "rgba(255,255,255,0.10)");
+
+  context.save();
+  context.fillStyle = grad;
+  roundRect(context, x, y, box.width, height, RADIUS);
+  context.fill();
+
+  // border
+  context.strokeStyle = "rgba(255,255,255,0.16)";
+  context.lineWidth = 1;
+  context.stroke();
+
+  // highlight strip
+  context.globalAlpha = 0.16;
+  context.fillStyle = "#fff";
+  roundRect(context, x+3, y+3, box.width-6, height*0.35, RADIUS-3);
+  context.fill();
+
+  context.restore();
+}
+
+function drawDebris(){
+  if (!debris.width || debris.width === 0) return;
+  const w = Math.abs(debris.width);
+  const x = debris.x;
+  const y = GROUND_Y - debris.y + cameraY;
+
+  context.save();
+  context.globalAlpha = 0.65;
+  context.fillStyle = "rgba(255, 92, 122, 0.55)";
+  roundRect(context, x, y, w, height, 10);
+  context.fill();
+  context.strokeStyle = "rgba(255,255,255,0.14)";
+  context.stroke();
+  context.restore();
+}
+
+function drawHUD(){
+  const score = Math.max(0, current - 1);
+
+  context.save();
+  context.fillStyle = "rgba(15,23,48,0.65)";
+  context.strokeStyle = "rgba(255,255,255,0.12)";
+  context.lineWidth = 1;
+  roundRect(context, 16, 14, canvas.width-32, 56, 16);
+  context.fill();
+  context.stroke();
+
+  context.fillStyle = "rgba(255,255,255,0.90)";
+  context.font = "700 18px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  context.fillText("🧱 Stack Builder", 30, 28);
+
+  context.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  context.fillStyle = "rgba(255,255,255,0.85)";
+  context.fillText("Score: " + score, canvas.width - 170, 30);
+
+  context.font = "500 12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+  context.fillStyle = "rgba(185,192,255,0.90)";
+  context.fillText("Tap / Click to drop", 30, 52);
+
+  context.fillStyle = "rgba(255,209,102,0.95)";
+  context.fillText("Goal: " + WIN_SCORE, canvas.width - 170, 50);
+
+  context.restore();
+}
+
+function newBox() {
+  boxes[current] = {
+    x: 0,
+    y: (current + 10) * height,
+    width: boxes[current - 1].width
+  };
+}
+
+function showWin(){
+  mode = 'win';
+  winOverlay.classList.add("show");
+  // reset scroll to top each win
+  loveBox.scrollTop = 0;
+}
+
+function showLose(reason){
+  mode = 'gameOver';
+  loseText.textContent = reason || "Your tower fell…";
+  loseOverlay.classList.add("show");
+}
+
+function hideOverlays(){
+  winOverlay.classList.remove("show");
+  loseOverlay.classList.remove("show");
+}
+
+function animate() {
+  // If overlays are showing, freeze gameplay updates but keep drawing scene
+  drawBackground();
+  for (let n = 0; n < boxes.length; n++) drawBlock(boxes[n], n);
+  drawDebris();
+  drawHUD();
+
+  if (mode !== 'gameOver' && mode !== 'win') {
+    if (mode === 'bounce') {
+      boxes[current].x = boxes[current].x + xSpeed;
+      if (xSpeed > 0 && boxes[current].x + boxes[current].width > canvas.width) xSpeed = -xSpeed;
+      if (xSpeed < 0 && boxes[current].x < 0) xSpeed = -xSpeed;
+    }
+
+    if (mode === 'fall') {
+      boxes[current].y = boxes[current].y - ySpeed;
+
+      if (boxes[current].y === boxes[current - 1].y + height) {
+        mode = 'bounce';
+        let difference = boxes[current].x - boxes[current - 1].x;
+
+        if (Math.abs(difference) >= boxes[current].width) {
+          showLose("Missed completely 💥");
+        }
+
+        debris = { y: boxes[current].y, width: difference, x: debris.x };
+
+        if (boxes[current].x > boxes[current - 1].x) {
+          boxes[current].width = boxes[current].width - difference;
+          debris.x = boxes[current].x + boxes[current].width;
+        } else {
+          debris.x = boxes[current].x - difference;
+          boxes[current].width = boxes[current].width + difference;
+          boxes[current].x = boxes[current - 1].x;
+        }
+
+        if (xSpeed > 0) xSpeed++;
+        else xSpeed--;
+
+        current++;
+        scrollCounter = height;
+        newBox();
+
+        // ✅ WIN CHECK (score = current-1)
+        if ((current - 1) >= WIN_SCORE) {
+          showWin();
+        }
+      }
+    }
+
+    debris.y = debris.y - ySpeed;
+
+    if (scrollCounter) {
+      cameraY++;
+      scrollCounter--;
+    }
+  }
+
+  window.requestAnimationFrame(animate);
+}
+
+function restart() {
+  hideOverlays();
+  boxes.splice(1, boxes.length - 1);
+  mode = 'bounce';
+  cameraY = 0;
+  scrollCounter = 0;
+  xSpeed = 2;
+  current = 1;
+  newBox();
+  debris.y = 0;
+  debris.width = 0;
+  debris.x = 0;
+}
+
+// Input (disable dropping while overlays are visible)
+canvas.onpointerdown = function() {
+  if (mode === 'gameOver' || mode === 'win') return; // use buttons instead
+  if (mode === 'bounce') mode = 'fall';
+};
+
+// Buttons
+playAgainBtn.onclick = restart;
+tryAgainBtn.onclick = restart;
+
+copyBtn.onclick = async () => {
+  try{
+    await navigator.clipboard.writeText(LOVE_MESSAGE);
+    copyBtn.textContent = "Copied!";
+    setTimeout(()=>copyBtn.textContent="Copy message", 1200);
+  }catch(e){
+    copyBtn.textContent = "Can't copy";
+    setTimeout(()=>copyBtn.textContent="Copy message", 1200);
+  }
+};
+
+// Start
+restart();
+animate();
+</script>
 </body>
-
 </html>
