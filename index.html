@@ -133,8 +133,8 @@ But honestly, what I love the most is us. The kind of relationship we have,nthod
 And yeah, mujhe aapko tease karna, tang karna, aur remind karna ki aap kitni pretty hai, mei aapse kitna pyaar karta hoon, bohot pasand hai, although zyada nahi bolunga, warna meri bebu ka ego aasman pe pahunch jayega😌😋But jokes aside, I really, really love and adore you. There’s just something about your presence that makes everything feel better. I don’t even know how to properly explain it. Aap wo ho mere liye jinke saath kuch special karna bhi zaroori nahi hota, just having you there makes an ordinary moment feel special.
 
 So yeah, Sana, meri bebu, aap cute ho, ridiculously pretty ho, kabhi kabhi aapko gussa bhi aata hai(affectionately, obviously), but most importantly, you have became the most special important part of my life❤️`;
-const GOAL_ROWS     = 18;   // rows to cross to win — longer road
-const HEARTS_NEEDED = 11;   // hearts to collect along the way
+const GOAL_ROWS     = 15;   // rows to cross to win — longer road
+const HEARTS_NEEDED = 7;   // hearts to collect along the way
 const MAX_SPEED_MULT = 1.5; // late-stage cars are up to ~2.1× base speed
 // ================================================================
 
@@ -354,7 +354,7 @@ function addRoadRow(rowIdx, laneCount = 1) {
   // Progressive difficulty: further rows = faster cars, up to MAX_SPEED_MULT
   const difficulty = Math.min(1, -rowIdx / GOAL_ROWS);       // 0 → 1 approaching goal
   const speedMult  = 1 + difficulty * (MAX_SPEED_MULT - 1);   // 1 → 2.1
-  const gapBoost   = 1 + difficulty * 0.35;                    // larger gaps at speed → still playable
+  const gapBoost   = 1 + difficulty * 0.6;                    // larger gaps at speed → still playable
 
   const lanes = [];
   for (let li = 0; li < laneCount; li++) {
