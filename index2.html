@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#241541" />
+<title>Penguin Crossing 🐧</title>
+<style>
+  html, body { margin: 0; height: 100%; width: 100%; overflow: hidden; position: fixed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(#241541 0%, #4a2673 28%, #c5578f 60%, #f39371 85%, #ffcfa0 100%); color: #fff;
+    -webkit-tap-highlight-color: transparent; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+    overscroll-behavior: none; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  #hud { position: fixed; top: env(safe-area-inset-top, 14px); left: 16px; z-index: 5;
+    pointer-events: none; text-shadow: 2px 2px 0 rgba(0,0,0,0.35); }
+  #hud .score { font-size: 44px; font-weight: 900; line-height: 1; }
+  #hud .best  { font-size: 13px; opacity: 0.85; margin-top: 4px; letter-spacing: 0.5px; }
+
+  /* on-screen dpad like the gif */
+  #pad { position: fixed; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    display: grid; grid-template-columns: repeat(3, 62px); grid-template-rows: repeat(2, 62px);
+    gap: 10px; z-index: 6; user-select: none; touch-action: none; }
+  @media (max-width: 380px) { #pad { grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(2, 54px); gap: 8px; } }
+  #pad .k { background: rgba(255,255,255,0.22); border: 2px solid rgba(255,255,255,0.75);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 24px; font-weight: 700; box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    transition: transform .06s, background .1s; -webkit-tap-highlight-color: transparent; }
+  #pad .k.active { transform: translateY(2px); background: rgba(255,255,255,0.4); }
+  #pad .k.up    { grid-column: 2; grid-row: 1; }
+  #pad .k.left  { grid-column: 1; grid-row: 2; }
+  #pad .k.down  { grid-column: 2; grid-row: 2; }
+  #pad .k.right { grid-column: 3; grid-row: 2; }
+
+  #overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    z-index: 10; background: rgba(30, 60, 90, 0.75); backdrop-filter: blur(10px);
+    animation: fade .8s ease; text-align: center; padding: 24px; }
+  #overlay.show { display: flex; }
+  #overlay .card { max-width: 440px; width: 100%; background: white; color: #2b3a4a;
+    padding: 28px 26px; border-radius: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    max-height: 85vh; display: flex; flex-direction: column; text-align: left; }
+  #overlay h1 { font-size: 26px; margin: 0 0 12px; color: #ff6fa6; text-align: center; flex: 0 0 auto; }
+  #overlay .scroll { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 4px 12px 20px 4px; margin-bottom: 14px;
+    /* fade at top & bottom to hint scrollability */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 24px), transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 24px), transparent 100%); }
+  #overlay .scroll::-webkit-scrollbar { width: 6px; }
+  #overlay .scroll::-webkit-scrollbar-thumb { background: #ffb3cf; border-radius: 3px; }
+  #overlay p { font-size: 16px; line-height: 1.6; margin: 0; white-space: pre-line; }
+  #overlay button { align-self: center; flex: 0 0 auto;
+    background: #ff8ab3; color: white; border: 0; padding: 12px 26px;
+    border-radius: 999px; font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,138,179,0.4); }
+  @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+
+  #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.65); color: white; padding: 12px 22px; border-radius: 14px;
+    font-size: 15px; font-weight: 600; z-index: 8; opacity: 0; transition: opacity .3s;
+    pointer-events: none; text-align: center; }
+  #toast.show { opacity: 1; }
+  #hint { position: fixed; bottom: 100px; left: 0; right: 0; text-align: center;
+    color: rgba(255,255,255,0.9); text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+    font-size: 13px; z-index: 4; pointer-events: none; transition: opacity .5s; }
+  #hint.hide { opacity: 0; }
+</style>
+</head>
+<body>
+  <canvas id="c" tabindex="0"></canvas>
+
+  <div id="hud">
+    <div class="score" id="score">0</div>
+    <div class="best">💗 <span id="hcount">0</span>/<span id="hneed">8</span> · GOAL: <span id="goal">20</span> BLOCKS · BEST: <span id="best">0</span></div>
+  </div>
+  <div id="toast"></div>
+
+  <div id="pad">
+    <div class="k up"    data-k="up">▲</div>
+    <div class="k left"  data-k="left">◀</div>
+    <div class="k down"  data-k="down">▼</div>
+    <div class="k right" data-k="right">▶</div>
+  </div>
+
+  <div id="hint">swipe or use the arrows — cross the road, don't get squished</div>
+
+  <!-- iOS haptic trick: hidden <input switch> + <label for=…>. Toggling fires the Taptic Engine on iOS 17.4+. -->
+  <input type="checkbox" id="__hap" switch style="position:fixed;opacity:0;pointer-events:none;width:1px;height:1px" />
+  <label id="__hapLbl" for="__hap" style="position:fixed;opacity:0;pointer-events:none;width:1px;height:1px"></label>
+
+  <div id="overlay"><div class="card">
+    <h1 id="msgTitle">You crossed it! 🐧💕</h1>
+    <div class="scroll"><p id="msgBody"></p></div>
+    <button id="again">play again</button>
+  </div></div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ---- Haptics ----
+// Android: navigator.vibrate. iOS Safari: toggle <input switch> via <label>.click() (17.4+).
+const hapLbl = document.querySelector('#__hapLbl');
+function haptic(kind = 'light') {
+  try {
+    if (navigator.vibrate) {
+      const map = { light: 8, medium: 18, strong: 35, error: [25, 40, 25], win: [10, 40, 10, 40, 60] };
+      navigator.vibrate(map[kind] || 10); return;
+    }
+    if (kind === 'error') { hapLbl.click(); setTimeout(() => hapLbl.click(), 60); setTimeout(() => hapLbl.click(), 120); }
+    else if (kind === 'win') { for (let i = 0; i < 4; i++) setTimeout(() => hapLbl.click(), i * 100); }
+    else hapLbl.click();
+  } catch(e) {}
+}
+
+// ================================================================
+//  EDIT THIS — message shown when she reaches the goal.
+// ================================================================
+const FINAL_TITLE   = "You crossed it! 🐧💕";
+const FINAL_MESSAGE = `Sana, I genuinely don’t know what kind of magic aap apne saath leke chalti ho, but whenever you video call me, show me your face, mera mood instantly better ho jaata hai. Like, I could be having the most boring or tiring day ever, doing absolutely nothing, and then I see your name pop up and suddenly I remember life is actually not that bad at all❤️
+
+Bebu, aap genuinely meri favourite person ho, love of my life ho, meri wifey ho, meri malkin ho, meri everything ho, and not just because you’re ridiculously pretty, although lets be honest, aap us part ko ignore karna bohot difficult bana deti hai. 
+You’re actually goddess level pretty, and sometimes I’m convinced ki aapko banate waqt God ne thoda zyada hi attention to detail de diya tha❤️ And then on top of that, aap itni cute ho, which is honestly unfair. Like, itni pretty hone ke baad itna adorable hone ki kya zarurat thi?? Mere liye thoda easy bhi to chhod sakti thi❤️
+
+But honestly, what I love the most is us. The kind of relationship we have,nthodi stupid, thodi funny, completely in love, and somehow perfect for each other. I love how ham ek second bilkul normal conversation kar rahe hote hai and literally two seconds later pata nahi kya nonsense chal raha hota hai. 😘 I can genuinely talk to you for hours about absolutely random shit and somehow never get bored.
+
+And yeah, mujhe aapko tease karna, tang karna, aur remind karna ki aap kitni pretty hai, mei aapse kitna pyaar karta hoon, bohot pasand hai, although zyada nahi bolunga, warna meri bebu ka ego aasman pe pahunch jayega😌😋But jokes aside, I really, really love and adore you. There’s just something about your presence that makes everything feel better. I don’t even know how to properly explain it. Aap wo ho mere liye jinke saath kuch special karna bhi zaroori nahi hota, just having you there makes an ordinary moment feel special.
+
+So yeah, Sana, meri bebu, aap cute ho, ridiculously pretty ho, kabhi kabhi aapko gussa bhi aata hai(affectionately, obviously), but most importantly, you have became the most special important part of my life❤️`;
+const GOAL_ROWS     = 32;   // rows to cross to win — longer road
+const HEARTS_NEEDED = 16;   // hearts to collect along the way
+const MAX_SPEED_MULT = 2.1; // late-stage cars are up to ~2.1× base speed
+// ================================================================
+
+// -------- Renderer / Scene / Camera ----------
+const canvas = document.querySelector('#c');
+const scene = new THREE.Scene();
+// Aesthetic dusk sky — Celeste / Studio-Ghibli vibe.
+// Painted procedurally on canvas: deep-purple night → pink dusk → warm horizon,
+// with scattered stars, soft glowing moon, and thin cloud wisps.
+function makeAestheticSky() {
+  const w = 2048, h = 1024;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+
+  // vertical gradient
+  const grd = g.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0.00, '#241541');   // deep indigo night
+  grd.addColorStop(0.28, '#4a2673');   // twilight purple
+  grd.addColorStop(0.55, '#c5578f');   // rose dusk
+  grd.addColorStop(0.78, '#f39371');   // soft sunset orange
+  grd.addColorStop(1.00, '#ffcfa0');   // warm cream horizon
+  g.fillStyle = grd; g.fillRect(0, 0, w, h);
+
+  // stars, denser toward top
+  for (let i = 0; i < 140; i++) {
+    const y = Math.pow(Math.random(), 1.6) * h * 0.62;
+    const x = Math.random() * w;
+    const r = 0.6 + Math.random() * 1.6;
+    g.globalAlpha = 0.5 + Math.random() * 0.5;
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    if (r > 1.3) {
+      const glow = g.createRadialGradient(x, y, 0, x, y, r * 10);
+      glow.addColorStop(0, 'rgba(255,240,220,0.35)');
+      glow.addColorStop(1, 'rgba(255,240,220,0)');
+      g.fillStyle = glow;
+      g.beginPath(); g.arc(x, y, r * 10, 0, Math.PI * 2); g.fill();
+    }
+  }
+  // a couple of shooting-star / cross-glint accents
+  g.globalAlpha = 0.9;
+  for (const [sx, sy, len] of [[w*0.15, h*0.22, 6], [w*0.55, h*0.10, 5], [w*0.82, h*0.32, 5]]) {
+    g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(sx - len, sy); g.lineTo(sx + len, sy); g.stroke();
+    g.beginPath(); g.moveTo(sx, sy - len); g.lineTo(sx, sy + len); g.stroke();
+  }
+  g.globalAlpha = 1;
+
+  // soft glowing moon
+  const mx = w * 0.74, my = h * 0.24;
+  const halo = g.createRadialGradient(mx, my, 0, mx, my, 240);
+  halo.addColorStop(0.00, 'rgba(255,240,220,0.55)');
+  halo.addColorStop(0.35, 'rgba(255,210,180,0.25)');
+  halo.addColorStop(1.00, 'rgba(255,180,140,0)');
+  g.fillStyle = halo;
+  g.beginPath(); g.arc(mx, my, 240, 0, Math.PI * 2); g.fill();
+  const disc = g.createRadialGradient(mx - 20, my - 20, 5, mx, my, 62);
+  disc.addColorStop(0, '#fff8e6');
+  disc.addColorStop(1, '#ffcda0');
+  g.fillStyle = disc;
+  g.beginPath(); g.arc(mx, my, 62, 0, Math.PI * 2); g.fill();
+
+  // thin horizontal cloud wisps near the horizon
+  for (let i = 0; i < 8; i++) {
+    const y = h * (0.58 + Math.random() * 0.24);
+    const x = Math.random() * w;
+    const cw = 340 + Math.random() * 480;
+    const ch = 24 + Math.random() * 34;
+    const cloud = g.createLinearGradient(x - cw/2, y, x + cw/2, y);
+    cloud.addColorStop(0.0, 'rgba(255,205,180,0)');
+    cloud.addColorStop(0.5, 'rgba(255,230,205,0.45)');
+    cloud.addColorStop(1.0, 'rgba(255,205,180,0)');
+    g.fillStyle = cloud;
+    g.beginPath(); g.ellipse(x, y, cw/2, ch/2, 0, 0, Math.PI * 2); g.fill();
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.anisotropy = 4;
+  return tex;
+}
+scene.background = makeAestheticSky();
+scene.fog = new THREE.Fog(0xd28a86, 72, 140);
+
+const isPortrait = () => innerHeight >= innerWidth;
+const camera = new THREE.PerspectiveCamera(isPortrait() ? 58 : 45, innerWidth/innerHeight, 0.1, 300);
+// isometric-ish angle — pull back further in portrait so more of the road is visible
+const camOffset = () => isPortrait() ? { x: 8, y: 15, z: 12 } : { x: 10, y: 14, z: 14 };
+{ const o = camOffset(); camera.position.set(o.x, o.y, o.z); }
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// Lights
+scene.add(new THREE.HemisphereLight(0xfff8dc, 0x7bcf7a, 1.05));
+const sun = new THREE.DirectionalLight(0xfff5e0, 1.6);
+sun.position.set(-8, 20, 10);
+sun.castShadow = true;
+const S = 30;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -S; sun.shadow.camera.right = S;
+sun.shadow.camera.top = S; sun.shadow.camera.bottom = -S;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 60;
+sun.shadow.bias = -0.0008;
+sun.shadow.normalBias = 0.02;
+scene.add(sun);
+
+// -------- Lego "stud" texture (canvas → texture) ----------
+function makeStudTexture(base, stud, dark, cols = 6) {
+  const size = 256;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d');
+  g.fillStyle = base; g.fillRect(0, 0, size, size);
+  // faint tile seam
+  g.strokeStyle = dark; g.lineWidth = 1.5;
+  g.strokeRect(0.75, 0.75, size-1.5, size-1.5);
+  const step = size / cols;
+  const r = step * 0.32;
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < cols; j++) {
+      const cx = step*i + step/2, cy = step*j + step/2;
+      // shadow
+      g.beginPath(); g.fillStyle = dark;
+      g.arc(cx + r*0.15, cy + r*0.25, r*1.05, 0, Math.PI*2); g.fill();
+      // stud
+      const grd = g.createRadialGradient(cx - r*0.35, cy - r*0.35, r*0.1, cx, cy, r);
+      grd.addColorStop(0, stud); grd.addColorStop(1, base);
+      g.beginPath(); g.fillStyle = grd; g.arc(cx, cy, r, 0, Math.PI*2); g.fill();
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.anisotropy = 4;
+  return tex;
+}
+function makeRoadTexture() {
+  const size = 256;
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d');
+  g.fillStyle = '#3a3f47'; g.fillRect(0, 0, size, size);
+  // dashed white line down middle (horizontal since road is x-axis)
+  g.fillStyle = 'rgba(255,255,255,0.85)';
+  for (let x = 8; x < size; x += 40) g.fillRect(x, size/2 - 3, 22, 6);
+  // subtle tile studs faintly
+  const cols = 6, step = size/cols, r = step*0.26;
+  g.fillStyle = 'rgba(0,0,0,0.15)';
+  for (let i = 0; i < cols; i++) for (let j = 0; j < cols; j++) {
+    g.beginPath(); g.arc(step*i+step/2, step*j+step/2, r, 0, Math.PI*2); g.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  return tex;
+}
+const grassTex   = makeStudTexture('#78d24a', '#a3e874', '#3e8a2e');
+const grassAltTex= makeStudTexture('#6cc63e', '#95e065', '#367a26');
+const shoulderTex= makeStudTexture('#8a95a3', '#b3bdc8', '#3d4550');
+const roadTex    = makeRoadTexture();
+
+// -------- World grid ----------
+const TILE = 2;              // one grid unit = 2 world units
+const LANE_HALF = 8;         // ±8 tiles wide (16 cells across)
+const TILES_ACROSS = LANE_HALF * 2 + 1;
+
+// row types: 'grass' | 'road'
+const rows = new Map();     // z-row index -> row object
+
+function makeTileGeometry() { return new THREE.PlaneGeometry(TILE * TILES_ACROSS, TILE); }
+
+function addGrassRow(rowIdx, altColor = false, isSafe = false) {
+  const g = new THREE.Group();
+  const tex = (altColor ? grassAltTex : grassTex).clone();
+  tex.needsUpdate = true;
+  tex.repeat.set(TILES_ACROSS, 1);
+  const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 });
+  const plane = new THREE.Mesh(makeTileGeometry(), mat);
+  plane.rotation.x = -Math.PI/2;
+  plane.receiveShadow = true;
+  g.add(plane);
+
+  // trees (obstacles) — none on the very first rows or on safe rows
+  const trees = [];
+  if (!isSafe && rowIdx < 0) {
+    const density = 0.22;
+    for (let i = -LANE_HALF; i <= LANE_HALF; i++) {
+      if (Math.random() < density) {
+        const t = makeTree();
+        t.position.set(i * TILE, 0, 0);
+        g.add(t);
+        trees.push(i);
+      }
+    }
+  }
+  g.position.z = rowIdx * TILE;
+  scene.add(g);
+  return { type: 'grass', idx: rowIdx, group: g, trees, isSafe };
+}
+
+function addRoadRow(rowIdx, laneCount = 1) {
+  const g = new THREE.Group();
+  const rTex = roadTex.clone(); rTex.needsUpdate = true;
+  rTex.repeat.set(TILES_ACROSS, laneCount);
+  const roadMat = new THREE.MeshStandardMaterial({ map: rTex, roughness: 0.9 });
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(TILE * TILES_ACROSS, TILE * laneCount), roadMat);
+  plane.rotation.x = -Math.PI/2;
+  plane.receiveShadow = true;
+  g.add(plane);
+
+  // Progressive difficulty: further rows = faster cars, up to MAX_SPEED_MULT
+  const difficulty = Math.min(1, -rowIdx / GOAL_ROWS);       // 0 → 1 approaching goal
+  const speedMult  = 1 + difficulty * (MAX_SPEED_MULT - 1);   // 1 → 2.1
+  const gapBoost   = 1 + difficulty * 0.35;                    // larger gaps at speed → still playable
+
+  const lanes = [];
+  for (let li = 0; li < laneCount; li++) {
+    const localZ = -TILE * (laneCount - 1) / 2 + li * TILE;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const speed = (3 + Math.random() * 4) * speedMult;
+    const cars = [];
+    const gap = (6 + Math.random() * 4) * gapBoost;
+    const count = Math.ceil((TILES_ACROSS * TILE + 10) / gap);
+    for (let i = 0; i < count; i++) {
+      const car = makeCar();
+      car.position.set(-LANE_HALF * TILE - 4 + i * gap * (Math.random()*0.5 + 0.75), 0, localZ);
+      car.userData.dir = dir;
+      if (dir < 0) car.rotation.y = Math.PI;
+      g.add(car); cars.push(car);
+    }
+    lanes.push({ localZ, dir, speed, cars });
+  }
+  g.position.z = rowIdx * TILE;
+  scene.add(g);
+  return { type: 'road', idx: rowIdx, group: g, lanes, laneCount };
+}
+
+// -------- Tree ----------
+const canopyPalette = [0x3fd955, 0x50e065, 0x2ec845, 0x67e578, 0x9cf07a];
+function makeTree() {
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.6, 8),
+    new THREE.MeshStandardMaterial({ color: 0xc65a2a, roughness: 0.75 }));
+  trunk.position.y = 0.3; trunk.castShadow = true;
+  const h = 1.2 + Math.random() * 1.6;
+  const canopyColor = canopyPalette[Math.floor(Math.random() * canopyPalette.length)];
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.3, h, 1.3),
+    new THREE.MeshStandardMaterial({
+      color: canopyColor, roughness: 0.6,
+      emissive: canopyColor, emissiveIntensity: 0.18
+    }));
+  canopy.position.y = 0.6 + h/2; canopy.castShadow = true; canopy.receiveShadow = true;
+  // Small brighter highlight cube on top for that chunky Crossy-Road pop (offset so it doesn't z-fight)
+  const tipH = 0.35 + Math.random() * 0.25;
+  const tipW = 0.75, tipD = 0.75;
+  const tip = new THREE.Mesh(new THREE.BoxGeometry(tipW, tipH, tipD),
+    new THREE.MeshStandardMaterial({ color: 0xaef58a, emissive: 0x88d060, emissiveIntensity: 0.25, roughness: 0.55 }));
+  tip.position.y = canopy.position.y + h/2 + tipH/2 - 0.001;
+  tip.castShadow = true;
+  g.add(trunk, canopy, tip);
+  return g;
+}
+
+// -------- Car (chunky voxel) ----------
+const carColors = [0xff3b3b, 0xff8a1f, 0xffcb1f, 0x21c4a3, 0x2fb0ff, 0xf78bff, 0xffffff, 0xff6fa6, 0x8dff5c];
+function makeCar() {
+  const g = new THREE.Group();
+  const color = carColors[Math.floor(Math.random() * carColors.length)];
+  const bodyMat  = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x2b2f36, roughness: 0.3, metalness: 0.2 });
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+
+  // truck vs car
+  const isTruck = Math.random() < 0.3;
+  const len = isTruck ? 2.4 : 1.6;
+
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(len, 0.5, 0.9), bodyMat);
+  chassis.position.y = 0.45; chassis.castShadow = true;
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(isTruck ? 0.7 : len*0.7, 0.5, 0.85),
+    isTruck ? bodyMat : glassMat);
+  cabin.position.set(isTruck ? -len/2 + 0.4 : 0, 0.95, 0);
+  cabin.castShadow = true;
+  g.add(chassis, cabin);
+  if (isTruck) {
+    // container
+    const box = new THREE.Mesh(new THREE.BoxGeometry(len - 0.9, 0.9, 0.9),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }));
+    box.position.set(0.35, 0.95, 0); box.castShadow = true;
+    g.add(box);
+  }
+  // wheels
+  for (const [wx, wz] of [[-len/2+0.35, 0.5],[-len/2+0.35, -0.5],[len/2-0.35, 0.5],[len/2-0.35, -0.5]]) {
+    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.15, 12), wheelMat);
+    w.rotation.x = Math.PI/2;
+    w.position.set(wx, 0.22, wz);
+    g.add(w);
+  }
+  return g;
+}
+
+// -------- Penguin ----------
+function makePenguin() {
+  const g = new THREE.Group();
+  const black  = new THREE.MeshStandardMaterial({ color: 0x1e2530, roughness: 0.7 });
+  const white  = new THREE.MeshStandardMaterial({ color: 0xfaf6ee, roughness: 0.8 });
+  const orange = new THREE.MeshStandardMaterial({ color: 0xff9d3b, roughness: 0.6 });
+  const eye    = new THREE.MeshStandardMaterial({ color: 0x111318 });
+  const pink   = new THREE.MeshStandardMaterial({ color: 0xff6fa6, roughness: 0.55, emissive: 0xff4488, emissiveIntensity: 0.25 });
+  const blush  = new THREE.MeshStandardMaterial({ color: 0xff9ec2, transparent: true, opacity: 0.85, roughness: 0.7 });
+  const lash   = new THREE.MeshStandardMaterial({ color: 0x111318 });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.7), black);
+  body.position.y = 0.6; body.castShadow = true;
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.75, 0.05), white);
+  belly.position.set(0, 0.55, 0.36);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.65, 0.7), black);
+  head.position.y = 1.42; head.castShadow = true;
+  const face = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.03), white);
+  face.position.set(0, 1.42, 0.36);
+  const beak = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.14, 0.22), orange);
+  beak.position.set(0, 1.35, 0.44);
+
+  // eyes with tiny lashes on top
+  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 0.04), eye);
+  eyeL.position.set(-0.15, 1.55, 0.37);
+  const eyeR = eyeL.clone(); eyeR.position.x = 0.15;
+  const lashL = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.03, 0.03), lash);
+  lashL.position.set(-0.15, 1.62, 0.37); lashL.rotation.z = 0.15;
+  const lashR = lashL.clone(); lashR.position.x = 0.15; lashR.rotation.z = -0.15;
+
+  // pink blush cheeks
+  const cheekL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.09, 0.03), blush);
+  cheekL.position.set(-0.24, 1.42, 0.375);
+  const cheekR = cheekL.clone(); cheekR.position.x = 0.24;
+
+  // Cute pink bow on top of head — two side "loops" + centre knot
+  const bow = new THREE.Group();
+  const bowL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.14), pink);
+  bowL.position.set(-0.2, 0, 0); bowL.rotation.z = 0.35; bowL.castShadow = true;
+  const bowR = bowL.clone(); bowR.position.x = 0.2; bowR.rotation.z = -0.35;
+  const knot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.16), pink);
+  knot.position.set(0, 0.02, 0); knot.castShadow = true;
+  const shine = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.02),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.7 }));
+  shine.position.set(-0.04, 0.05, 0.09);
+  bow.add(bowL, bowR, knot, shine);
+  bow.position.set(0, 1.82, 0.05);
+
+  const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.7, 0.55), black);
+  wingL.position.set(-0.48, 0.65, 0); wingL.castShadow = true;
+  const wingR = wingL.clone(); wingR.position.x = 0.48;
+  const footL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.35), orange);
+  footL.position.set(-0.2, 0.05, 0.1);
+  const footR = footL.clone(); footR.position.x = 0.2;
+
+  g.add(body, belly, head, face, beak, eyeL, eyeR, lashL, lashR,
+        cheekL, cheekR, bow, wingL, wingR, footL, footR);
+  g.scale.setScalar(0.9);
+  return g;
+}
+
+// -------- Sky decor: chunky Lego clouds + distant hills ----------
+const clouds = new THREE.Group();
+const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffe4d1, roughness: 0.95, emissive: 0xffc9a8, emissiveIntensity: 0.28 });
+function makeCloud() {
+  const g = new THREE.Group();
+  // Two or three separated puffs so faces don't coincide
+  const n = 2 + Math.floor(Math.random() * 2);
+  const w0 = 2.0 + Math.random() * 1.4;
+  const h0 = 1.0 + Math.random() * 0.6;
+  const spacing = w0 * 0.85; // guarantees a gap
+  for (let i = 0; i < n; i++) {
+    const w = w0 * (0.8 + Math.random() * 0.4);
+    const h = h0 * (0.85 + Math.random() * 0.3);
+    const d = 1.5 + Math.random() * 1.2;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cloudMat);
+    b.position.set((i - (n - 1) / 2) * spacing, (i % 2) * 0.25, 0);
+    g.add(b);
+  }
+  g.userData.drift = 0.6 + Math.random() * 0.8;
+  return g;
+}
+for (let i = 0; i < 12; i++) {
+  const c = makeCloud();
+  c.position.set((Math.random() - 0.5) * 120, 12 + Math.random() * 8, -30 - Math.random() * 60);
+  clouds.add(c);
+}
+scene.add(clouds);
+
+// Two silhouette mountain layers — a far dark-purple range, a nearer rose range.
+// Emissive on unlit-style materials so they read as pure silhouettes against the sky.
+const hills = new THREE.Group();
+function addMountainLayer(z, color, minH, maxH, count, spacing) {
+  const mat = new THREE.MeshBasicMaterial({ color, fog: true });
+  for (let i = 0; i < count; i++) {
+    const w = 8 + Math.random() * 8;
+    const h = minH + Math.random() * (maxH - minH);
+    const d = 3 + Math.random() * 3;
+    const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    // pyramid-y feel with a smaller cap sitting fully on top (no overlap → no z-fight)
+    const capH = h * 0.55, capW = w * 0.55, capD = d * 0.55;
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(capW, capH, capD), mat);
+    cap.position.set(0, h/2 + capH/2 - 0.001, 0);
+    box.add(cap);
+    const zJit = ((i * 37) % 9) - 4;
+    box.position.set((i - count/2) * spacing + (Math.random()-0.5)*3, h/2, z + zJit);
+    hills.add(box);
+  }
+}
+// far layer — deep purple, distant
+addMountainLayer(-72, 0x3a1f5c, 5,  8, 14, 12);
+// mid layer — rose dusk
+addMountainLayer(-58, 0x7a3a72, 4,  6, 12, 12);
+scene.add(hills);
+
+// Narrow safety strip under the row area only — hides hairline seams
+// between adjacent row planes without covering the mountains/sky beyond.
+const groundBg = new THREE.Mesh(
+  new THREE.PlaneGeometry(TILE * TILES_ACROSS + 1, 200),
+  new THREE.MeshStandardMaterial({ color: 0x3e7a2e, roughness: 1 })
+);
+groundBg.rotation.x = -Math.PI/2;
+groundBg.position.y = -0.05;
+scene.add(groundBg);
+
+// -------- Heart (collectible) ----------
+const heartShape = (() => {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0);
+  s.bezierCurveTo(0, 0, -0.5, 0.5, -0.5, 0);
+  s.bezierCurveTo(-0.5, -0.3, 0, -0.4, 0, -0.7);
+  s.bezierCurveTo(0, -0.4, 0.5, -0.3, 0.5, 0);
+  s.bezierCurveTo(0.5, 0.5, 0, 0, 0, 0);
+  return s;
+})();
+const heartGeo = new THREE.ExtrudeGeometry(heartShape,
+  { depth: 0.15, bevelEnabled: true, bevelSize: 0.06, bevelThickness: 0.06, bevelSegments: 2 });
+heartGeo.center();
+const heartMat = new THREE.MeshStandardMaterial({
+  color: 0xff6fa6, emissive: 0xff2a70, emissiveIntensity: 0.55, roughness: 0.4, metalness: 0.1 });
+function makeHeartMesh() {
+  const m = new THREE.Mesh(heartGeo, heartMat);
+  m.rotation.x = Math.PI; // point up
+  m.scale.setScalar(0.55);
+  m.castShadow = true;
+  m.userData.bob = Math.random() * Math.PI * 2;
+  m.userData.shared = true;
+  return m;
+}
+
+// -------- Goal (rainbow arch) ----------
+function makeGoal() {
+  const g = new THREE.Group();
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.22, 12, 24, Math.PI),
+    new THREE.MeshStandardMaterial({ color: 0xff6fa6, emissive: 0xff4477, emissiveIntensity: 0.4 }));
+  arch.position.set(0, 1.6, 0);
+  arch.castShadow = true;
+  const podium = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.0, 0.25, 24),
+    new THREE.MeshStandardMaterial({ color: 0xfff2fa, emissive: 0xffa8c9, emissiveIntensity: 0.3 }));
+  podium.position.y = 0.13;
+  g.add(arch, podium);
+  // sparkles
+  for (let i = 0; i < 6; i++) {
+    const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.13),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe5f0, emissiveIntensity: 0.9 }));
+    const a = (i/6) * Math.PI * 2;
+    s.position.set(Math.cos(a)*1.6, 1.6 + Math.sin(a)*0.8, 0);
+    g.add(s);
+  }
+  return g;
+}
+
+// -------- Populate world ahead of player ----------
+const rowTypeSeq = []; // decide row types up to some horizon
+function planRow(idx) {
+  if (rowTypeSeq[idx] !== undefined) return rowTypeSeq[idx];
+  if (idx === 0) return rowTypeSeq[idx] = { kind: 'grass', safe: true };
+  if (idx === -GOAL_ROWS) return rowTypeSeq[idx] = { kind: 'goal' };
+  // avoid two safe grass in a row; avoid 4+ roads in a row
+  const prev = rowTypeSeq[idx+1] || { kind: 'grass' };
+  const prev2 = rowTypeSeq[idx+2] || { kind: 'grass' };
+  const prev3 = rowTypeSeq[idx+3] || { kind: 'grass' };
+  const roadStreak = [prev, prev2, prev3].filter(r => r.kind === 'road').length;
+  if (roadStreak >= 3) return rowTypeSeq[idx] = { kind: 'grass', safe: false };
+  const r = Math.random();
+  if (r < 0.6) {
+    // Later stages get more multi-lane roads for extra challenge
+    const distance = -idx / GOAL_ROWS; // 0 near start, 1 near goal
+    const rr = Math.random();
+    let lanes = 1;
+    if (distance > 0.65)      lanes = rr < 0.25 ? 3 : rr < 0.65 ? 2 : 1;
+    else if (distance > 0.35) lanes = rr < 0.45 ? 2 : 1;
+    else                       lanes = rr < 0.25 ? 2 : 1;
+    return rowTypeSeq[idx] = { kind: 'road', lanes };
+  }
+  return rowTypeSeq[idx] = { kind: 'grass', safe: false };
+}
+function ensureRow(idx) {
+  if (rows.has(idx)) return rows.get(idx);
+  const plan = planRow(idx);
+  let row;
+  if (plan.kind === 'road') row = addRoadRow(idx, plan.lanes);
+  else if (plan.kind === 'goal') {
+    row = addGrassRow(idx, false, true);
+    const goal = makeGoal();
+    goal.position.set(0, 0, 0);
+    row.group.add(goal);
+    row.isGoal = true;
+  } else row = addGrassRow(idx, (Math.abs(idx) % 2 === 0), plan.safe);
+  rows.set(idx, row);
+  return row;
+}
+function pruneRows(playerRow) {
+  for (const [idx, row] of rows) {
+    if (idx > playerRow + 6 || idx < playerRow - GOAL_ROWS - 6) {
+      scene.remove(row.group);
+      row.group.traverse(o => {
+        if (o.userData?.shared) return;
+        if (o.geometry) o.geometry.dispose?.();
+        if (o.material && o.material.map) o.material.map.dispose?.();
+        if (o.material) o.material.dispose?.();
+      });
+      rows.delete(idx);
+    }
+  }
+}
+
+// build initial world (rows go negative as we move forward)
+for (let i = 3; i >= -GOAL_ROWS - 3; i--) ensureRow(i);
+
+// -------- Heart placement (fixed cells per run) ----------
+const heartMeshes = []; // { mesh, cellX, cellZ, alive }
+function placeHearts() {
+  for (const h of heartMeshes) h.mesh.parent && h.mesh.parent.remove(h.mesh);
+  heartMeshes.length = 0;
+  const rowsInRange = [];
+  for (let rz = -1; rz > -GOAL_ROWS; rz--) rowsInRange.push(rz);
+  // shuffle
+  for (let i = rowsInRange.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rowsInRange[i], rowsInRange[j]] = [rowsInRange[j], rowsInRange[i]];
+  }
+  const placed = new Set();
+  const tryPlace = (rz) => {
+    const row = ensureRow(rz);
+    if (row.type === 'road') {
+      // hearts hover over road tiles too — pick a random lane column
+      const cx = Math.floor(Math.random() * (LANE_HALF*2 + 1)) - LANE_HALF;
+      const key = cx + ',' + rz;
+      if (placed.has(key)) return false;
+      const m = makeHeartMesh();
+      m.position.set(cx * TILE, 1.3, 0);
+      row.group.add(m);
+      heartMeshes.push({ mesh: m, cellX: cx, cellZ: rz, alive: true, hover: true });
+      placed.add(key); return true;
+    }
+    const cols = [];
+    for (let cx = -LANE_HALF; cx <= LANE_HALF; cx++) {
+      if (row.trees && row.trees.includes(cx)) continue;
+      if (placed.has(cx + ',' + rz)) continue;
+      cols.push(cx);
+    }
+    if (!cols.length) return false;
+    const cx = cols[Math.floor(Math.random() * cols.length)];
+    const m = makeHeartMesh();
+    m.position.set(cx * TILE, 0.85, 0);
+    row.group.add(m);
+    heartMeshes.push({ mesh: m, cellX: cx, cellZ: rz, alive: true, hover: false });
+    placed.add(cx + ',' + rz); return true;
+  };
+  let attempts = 0;
+  while (heartMeshes.length < HEARTS_NEEDED && attempts < 200) {
+    const rz = rowsInRange[attempts % rowsInRange.length];
+    tryPlace(rz);
+    attempts++;
+  }
+}
+placeHearts();
+
+// -------- Player state ----------
+const penguin = makePenguin();
+penguin.position.set(0, 0, 0);
+scene.add(penguin);
+
+const player = {
+  cellX: 0, cellZ: 0,  // in tile units
+  x: 0, z: 0,
+  hopping: false,
+  hopT: 0, hopDur: 0.16,
+  from: new THREE.Vector3(), to: new THREE.Vector3(),
+  facing: 0, // radians
+  facingTarget: 0,
+  best: parseInt(localStorage.getItem('penguinBest') || '0', 10),
+  furthest: 0,
+  dead: false,
+};
+document.querySelector('#best').textContent = player.best;
+document.querySelector('#goal').textContent = GOAL_ROWS;
+document.querySelector('#hneed').textContent = HEARTS_NEEDED;
+let heartsCollected = 0;
+const hcountEl = document.querySelector('#hcount');
+const toastEl = document.querySelector('#toast');
+let toastTimer = null;
+function toast(msg, ms = 1400) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
+}
+
+// -------- Input ----------
+const hintEl = document.querySelector('#hint');
+let hinted = false;
+function hideHint() { if (!hinted) { hintEl.classList.add('hide'); hinted = true; } }
+
+function tryMove(dir) {
+  if (player.hopping || player.dead) return;
+  const [dx, dz] = ({ up:[0,-1], down:[0,1], left:[-1,0], right:[1,0] })[dir];
+  const nx = player.cellX + dx, nz = player.cellZ + dz;
+  if (nx < -LANE_HALF || nx > LANE_HALF) return;
+  // check trees at target
+  const row = ensureRow(nz);
+  if (row.type === 'grass' && row.trees && row.trees.includes(nx)) return;
+  player.from.set(player.x, 0, player.z);
+  player.to.set(nx * TILE, 0, nz * TILE);
+  player.hopping = true; player.hopT = 0;
+  player.cellX = nx; player.cellZ = nz;
+  player.facingTarget = ({ up: 0, down: Math.PI, left: Math.PI/2, right: -Math.PI/2 })[dir];
+  haptic('light');
+  hideHint();
+}
+
+// keyboard
+const keyMap = { ArrowUp: 'up', w: 'up', W: 'up',
+  ArrowDown: 'down', s: 'down', S: 'down',
+  ArrowLeft: 'left', a: 'left', A: 'left',
+  ArrowRight: 'right', d: 'right', D: 'right' };
+window.addEventListener('keydown', (e) => {
+  const dir = keyMap[e.key]; if (!dir) return; e.preventDefault(); tryMove(dir);
+});
+
+// dpad
+document.querySelectorAll('#pad .k').forEach(el => {
+  const dir = el.dataset.k;
+  const press = (e) => { e.preventDefault(); e.stopPropagation(); el.classList.add('active'); tryMove(dir); };
+  const release = (e) => { e && e.stopPropagation && e.stopPropagation(); el.classList.remove('active'); };
+  el.addEventListener('pointerdown', press);
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointerleave', release);
+  el.addEventListener('pointercancel', release);
+});
+document.querySelector('#pad').addEventListener('pointerdown', e => e.stopPropagation());
+
+// swipe on canvas
+let touch = null;
+canvas.addEventListener('pointerdown', (e) => { touch = { x: e.clientX, y: e.clientY }; });
+canvas.addEventListener('pointerup', (e) => {
+  if (!touch) return;
+  const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  if (Math.max(adx, ady) < 20) { tryMove('up'); touch = null; return; }
+  if (adx > ady) tryMove(dx > 0 ? 'right' : 'left');
+  else tryMove(dy > 0 ? 'down' : 'up');
+  touch = null;
+});
+
+// -------- Game logic ----------
+const scoreEl = document.querySelector('#score');
+const overlay = document.querySelector('#overlay');
+document.querySelector('#msgTitle').textContent = FINAL_TITLE;
+document.querySelector('#msgBody').textContent = FINAL_MESSAGE;
+document.querySelector('#again').addEventListener('click', () => location.reload());
+
+function die() {
+  if (player.dead) return;
+  player.dead = true;
+  haptic('error');
+  // squish
+  penguin.scale.y = 0.25; penguin.scale.x = 1.2; penguin.scale.z = 1.2;
+  setTimeout(() => respawn(), 700);
+}
+function respawn() {
+  player.cellX = 0; player.cellZ = 0;
+  player.x = 0; player.z = 0;
+  player.hopping = false;
+  penguin.scale.set(0.9, 0.9, 0.9);
+  penguin.position.set(0, 0, 0);
+  player.dead = false;
+  player.furthest = 0;
+  scoreEl.textContent = 0;
+  heartsCollected = 0;
+  hcountEl.textContent = 0;
+  placeHearts();
+  toast('oops — try again 💗');
+}
+function win() {
+  overlay.classList.add('show');
+  haptic('win');
+  penguin.userData.win = performance.now();
+}
+
+// -------- Frame loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+
+  // hop animation
+  if (player.hopping) {
+    player.hopT += dt;
+    const t = Math.min(1, player.hopT / player.hopDur);
+    const e = t;
+    player.x = player.from.x + (player.to.x - player.from.x) * e;
+    player.z = player.from.z + (player.to.z - player.from.z) * e;
+    const jumpH = 0.6 * Math.sin(t * Math.PI);
+    penguin.position.set(player.x, jumpH, player.z);
+    if (t >= 1) {
+      player.hopping = false;
+      penguin.position.y = 0;
+      // heart pickup
+      for (const h of heartMeshes) {
+        if (h.alive && h.cellX === player.cellX && h.cellZ === player.cellZ) {
+          h.alive = false;
+          h.mesh.parent && h.mesh.parent.remove(h.mesh);
+          heartsCollected++;
+          hcountEl.textContent = heartsCollected;
+          haptic('medium');
+          hcountEl.animate([{transform:'scale(1)'},{transform:'scale(1.35)'},{transform:'scale(1)'}],{duration:280});
+        }
+      }
+      // score
+      const advanced = -player.cellZ;
+      if (advanced > player.furthest) {
+        player.furthest = advanced;
+        scoreEl.textContent = advanced;
+        if (advanced > player.best) {
+          player.best = advanced;
+          localStorage.setItem('penguinBest', advanced);
+          document.querySelector('#best').textContent = advanced;
+        }
+      }
+      // goal check — need all hearts AND reach goal
+      const row = ensureRow(player.cellZ);
+      if (row.isGoal) {
+        if (heartsCollected >= HEARTS_NEEDED) win();
+        else toast(`collect all ${HEARTS_NEEDED} hearts first 💗 (${heartsCollected}/${HEARTS_NEEDED})`, 1800);
+      }
+    }
+  } else {
+    penguin.position.set(player.x, 0, player.z);
+  }
+  // face turn
+  let df = player.facingTarget - player.facing;
+  while (df > Math.PI) df -= Math.PI*2;
+  while (df < -Math.PI) df += Math.PI*2;
+  player.facing += df * Math.min(1, dt * 18);
+  penguin.rotation.y = player.facing;
+
+  // waddle
+  const bob = Math.sin(now / 220) * 0.03;
+  if (!player.hopping && !player.dead) penguin.position.y = bob;
+
+  // extend world forward
+  for (let i = player.cellZ + 3; i >= player.cellZ - GOAL_ROWS - 4; i--) ensureRow(i);
+  pruneRows(player.cellZ);
+
+  // move cars, check collision
+  const halfW = LANE_HALF * TILE + 5;
+  for (const row of rows.values()) {
+    if (row.type !== 'road') continue;
+    const worldZ = row.group.position.z;
+    for (const lane of row.lanes) {
+      for (const car of lane.cars) {
+        car.position.x += lane.dir * lane.speed * dt;
+        if (lane.dir > 0 && car.position.x > halfW) car.position.x = -halfW;
+        else if (lane.dir < 0 && car.position.x < -halfW) car.position.x = halfW;
+        // collision (AABB in row local x, world z-check via row worldZ + lane.localZ)
+        if (!player.dead && !player.hopping) {
+          const laneWorldZ = worldZ + lane.localZ;
+          if (Math.abs(player.z - laneWorldZ) < 0.7) {
+            const cw = car.children[0].geometry.parameters.width;
+            if (Math.abs(player.x - car.position.x) < (cw/2 + 0.35)) die();
+          }
+        } else if (!player.dead && player.hopping) {
+          // check midair collision too
+          const laneWorldZ = worldZ + lane.localZ;
+          if (Math.abs(penguin.position.x - car.position.x) < 0.8 &&
+              Math.abs(penguin.position.z - laneWorldZ) < 0.7 &&
+              penguin.position.y < 0.35) die();
+        }
+      }
+    }
+  }
+
+  // camera follow
+  const o = camOffset();
+  const targetX = player.x + o.x;
+  const targetZ = player.z + o.z;
+  camera.position.x += (targetX - camera.position.x) * Math.min(1, dt * 5);
+  camera.position.z += (targetZ - camera.position.z) * Math.min(1, dt * 5);
+  camera.lookAt(player.x, 0, player.z);
+  sun.position.set(player.x - 8, 20, player.z + 10);
+  sun.target.position.set(player.x, 0, player.z);
+  sun.target.updateMatrixWorld();
+
+  // heart bob & spin
+  for (const h of heartMeshes) {
+    if (!h.alive) continue;
+    h.mesh.rotation.z += dt * 2;
+    const baseY = h.hover ? 1.3 : 0.85;
+    h.mesh.position.y = baseY + Math.sin(now/500 + h.mesh.userData.bob) * 0.15;
+  }
+
+  // clouds drift + follow player forward so they always fill the far sky
+  for (const c of clouds.children) {
+    c.position.x += c.userData.drift * dt;
+    if (c.position.x > 65) c.position.x = -65;
+  }
+  clouds.position.z = player.z;
+  hills.position.z  = player.z;
+  groundBg.position.z = player.z - 20;
+
+  // goal sparkle spin
+  const goalRow = rows.get(-GOAL_ROWS);
+  if (goalRow) {
+    goalRow.group.children.forEach(ch => {
+      if (ch.geometry instanceof THREE.OctahedronGeometry) {
+        ch.rotation.y += dt * 2; ch.rotation.x += dt * 1.5;
+      }
+    });
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(n => { last = n; frame(n); });
+
+function resize() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.fov = isPortrait() ? 58 : 45;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight, false);
+}
+addEventListener('resize', resize);
+addEventListener('orientationchange', () => setTimeout(resize, 200));
+</script>
+</body>
+</html>
