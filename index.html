@@ -133,9 +133,9 @@ But honestly, what I love the most is us. The kind of relationship we have,nthod
 And yeah, mujhe aapko tease karna, tang karna, aur remind karna ki aap kitni pretty hai, mei aapse kitna pyaar karta hoon, bohot pasand hai, although zyada nahi bolunga, warna meri bebu ka ego aasman pe pahunch jayega😌😋But jokes aside, I really, really love and adore you. There’s just something about your presence that makes everything feel better. I don’t even know how to properly explain it. Aap wo ho mere liye jinke saath kuch special karna bhi zaroori nahi hota, just having you there makes an ordinary moment feel special.
 
 So yeah, Sana, meri bebu, aap cute ho, ridiculously pretty ho, kabhi kabhi aapko gussa bhi aata hai(affectionately, obviously), but most importantly, you have became the most special important part of my life❤️`;
-const GOAL_ROWS     = 32;   // rows to cross to win — longer road
-const HEARTS_NEEDED = 16;   // hearts to collect along the way
-const MAX_SPEED_MULT = 2.1; // late-stage cars are up to ~2.1× base speed
+const GOAL_ROWS     = 18;   // rows to cross to win — longer road
+const HEARTS_NEEDED = 11;   // hearts to collect along the way
+const MAX_SPEED_MULT = 1.5; // late-stage cars are up to ~2.1× base speed
 // ================================================================
 
 // -------- Renderer / Scene / Camera ----------
@@ -362,7 +362,7 @@ function addRoadRow(rowIdx, laneCount = 1) {
     const dir = Math.random() < 0.5 ? -1 : 1;
     const speed = (3 + Math.random() * 4) * speedMult;
     const cars = [];
-    const gap = (6 + Math.random() * 4) * gapBoost;
+    const gap = (10 + Math.random() * 5) * gapBoost;
     const count = Math.ceil((TILES_ACROSS * TILE + 10) / gap);
     for (let i = 0; i < count; i++) {
       const car = makeCar();
